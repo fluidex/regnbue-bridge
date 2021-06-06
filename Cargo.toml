@@ -7,3 +7,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+
+[[bin]]
+name = "tele_in"
+path = "src/bin/tele_in.rs"
+
+[[bin]]
+name = "tele_out"
+path = "src/bin/tele_out.rs"
