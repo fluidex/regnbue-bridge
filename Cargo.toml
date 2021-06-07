@@ -1,5 +1,5 @@
 [package]
-name = "Heimdallr"
+name = "heimdallr"
 version = "0.1.0"
 authors = [ "HAOYUatHZ <haoyu@protonmail.com>" ]
 edition = "2018"
@@ -12,6 +12,7 @@ ctrlc = { version = "3.1", features = [ "termination" ] }
 env_logger = "0.6"
 futures = "0.3"
 log = "0.4"
+sqlx = { version = "0.5.1", features = [ "runtime-tokio-rustls", "postgres", "chrono", "decimal", "json", "migrate" ] }
 tokio = { version = "0.2", features = [ "full" ] }
 
 [[bin]]

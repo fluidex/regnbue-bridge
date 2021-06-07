@@ -1,3 +1,4 @@
+use heimdallr::tele_out::storage;
 use futures::{channel::mpsc, executor::block_on, SinkExt, StreamExt};
 use std::cell::RefCell;
 
@@ -16,6 +17,7 @@ async fn main() -> anyhow::Result<()> {
     }
 
     // TODO: init storage
+    let _dbpool = storage::from_config().await?;
 
     tokio::select! {
         _ = async { stop_signal_receiver.next().await } => {
