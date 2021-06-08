@@ -7,7 +7,7 @@ pub struct EthSender {
 }
 
 impl EthSender {
-    pub fn from_config_with_pool(config: &Settings, connpool: PoolType) -> Self {
+    pub fn from_config_with_pool(_config: &Settings, connpool: PoolType) -> Self {
         Self { connpool }
     }
 
