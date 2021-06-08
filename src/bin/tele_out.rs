@@ -27,7 +27,16 @@ async fn main() -> anyhow::Result<()> {
 
     let _dbpool = storage::from_config(&settings).await?;
 
+    let fetcher_task_handle = run_task_fetcher(stop_signal_sender);
+    let eth_sender_task_handle = run_eth_sender(stop_signal_sender);
+
     tokio::select! {
+        _ = async { fetcher_task_handle.await } => {
+            panic!("Tele_out task fetcher actor is not supposed to finish its execution")
+        },
+        _ = async { eth_sender_task_handle.await } => {
+            panic!("Ethereum Sender actor is not supposed to finish its execution")
+        },
         _ = async { stop_signal_receiver.next().await } => {
             log::warn!("Stop signal received, shutting down");
         }
