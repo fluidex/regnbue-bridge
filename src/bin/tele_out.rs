@@ -25,6 +25,7 @@ async fn main() -> anyhow::Result<()> {
         .expect("Error setting Ctrl-C handler");
     }
 
+    // TODO: maybe separate and have: 1. consumer 2. producer 3. sender
     let dbpool = storage::from_config(&settings).await?;
     let fetcher = TaskFetcher::from_config_with_pool(&settings, dbpool.clone());
     let eth_sender = EthSender::from_config_with_pool(&settings, dbpool);

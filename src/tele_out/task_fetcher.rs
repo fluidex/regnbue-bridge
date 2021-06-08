@@ -1,5 +1,5 @@
-use crate::tele_out::Settings;
 use crate::tele_out::storage::PoolType;
+use crate::tele_out::Settings;
 
 #[derive(Debug)]
 pub struct TaskFetcher {
@@ -8,9 +8,7 @@ pub struct TaskFetcher {
 
 impl TaskFetcher {
     pub fn from_config_with_pool(config: &Settings, connpool: PoolType) -> Self {
-        Self {
-            connpool
-        }
+        Self { connpool }
     }
 
     pub fn run(&self) -> tokio::task::JoinHandle<()> {
