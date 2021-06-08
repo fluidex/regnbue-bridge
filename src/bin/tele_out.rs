@@ -1,5 +1,5 @@
 use futures::{channel::mpsc, executor::block_on, SinkExt, StreamExt};
-use heimdallr::tele_out::{storage, Settings};
+use heimdallr::tele_out::{storage, EthSender, Settings, TaskFetcher};
 use std::cell::RefCell;
 
 #[tokio::main]
@@ -25,9 +25,9 @@ async fn main() -> anyhow::Result<()> {
         .expect("Error setting Ctrl-C handler");
     }
 
-    let _dbpool = storage::from_config(&settings).await?;
-    let fetcher = TaskFetcher::from_config();
-    let eth_sender = EthSender::from_config();
+    let dbpool = storage::from_config(&settings).await?;
+    let fetcher = TaskFetcher::from_config_with_pool(&settings, dbpool);
+    let eth_sender = EthSender::from_config_with_pool(&settings, dbpool);
     let fetcher_task_handle = fetcher.run();
     let eth_sender_task_handle = eth_sender.run();
 
