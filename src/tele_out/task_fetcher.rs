@@ -12,4 +12,8 @@ impl TaskFetcher {
             connpool
         }
     }
+
+    pub fn run(&self) -> tokio::task::JoinHandle<()> {
+        unimplemented!()
+    }
 }
