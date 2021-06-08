@@ -1,5 +1,6 @@
+use serde::Deserialize;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct Settings {
     pub db: String,
 }

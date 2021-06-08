@@ -8,10 +8,13 @@ edition = "2018"
 
 [dependencies]
 anyhow = "1.0"
+config_rs = { package = "config", version = "0.10.1" }
 ctrlc = { version = "3.1", features = [ "termination" ] }
+dotenv = "0.15.0"
 env_logger = "0.6"
 futures = "0.3"
 log = "0.4"
+serde = { version = "1.0.124", features = [ "derive" ] }
 sqlx = { version = "0.5.1", features = [ "runtime-tokio-rustls", "postgres", "chrono", "decimal", "json", "migrate" ] }
 tokio = { version = "0.2", features = [ "full" ] }
 
