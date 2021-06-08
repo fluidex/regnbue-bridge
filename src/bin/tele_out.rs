@@ -27,6 +27,7 @@ async fn main() -> anyhow::Result<()> {
 
     let _dbpool = storage::from_config(&settings).await?;
 
+    // TODO: this seems using panic to notify the main thread. should we use the dingir-exchange style?
     let fetcher_task_handle = run_task_fetcher(stop_signal_sender);
     let eth_sender_task_handle = run_eth_sender(stop_signal_sender);
 
