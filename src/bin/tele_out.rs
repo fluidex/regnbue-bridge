@@ -26,7 +26,8 @@ async fn main() -> anyhow::Result<()> {
     }
 
     // TODO: init storage
-    let _dbpool = storage::from_config(&settings).await?;
+    // let _dbpool = storage::from_config(&settings).await?;
+    heimdallr::tele_out::storage::MIGRATOR.run(&settings.db);
 
     tokio::select! {
         _ = async { stop_signal_receiver.next().await } => {
