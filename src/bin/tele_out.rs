@@ -1,5 +1,5 @@
-use heimdallr::tele_out::{storage, Settings};
 use futures::{channel::mpsc, executor::block_on, SinkExt, StreamExt};
+use heimdallr::tele_out::{storage, Settings};
 use std::cell::RefCell;
 
 #[tokio::main]
@@ -25,7 +25,6 @@ async fn main() -> anyhow::Result<()> {
         .expect("Error setting Ctrl-C handler");
     }
 
-    // TODO: init storage
     let _dbpool = storage::from_config(&settings).await?;
 
     tokio::select! {
