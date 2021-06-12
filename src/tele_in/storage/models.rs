@@ -9,6 +9,7 @@ pub mod tablenames {
 #[sqlx(type_name = "tx_status", rename_all = "snake_case")]
 pub enum TxStatus {
     Proposed,
+    Claimed,
     Sent,
     Confirmed,
 }
