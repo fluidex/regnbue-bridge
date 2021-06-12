@@ -1,8 +1,8 @@
-use serde::{Deserialize, Serialize};
 use crate::storage::{DecimalDbType, TimestampDbType};
+use serde::Serialize;
 
 pub mod tablenames {
-    pub const InternalTx: &str = "internal_tx";
+    pub const INTERNAL_TX: &str = "internal_tx";
 }
 
 #[derive(sqlx::Type, Debug, Clone, Serialize)]
