@@ -1,5 +1,5 @@
 use futures::{channel::mpsc, executor::block_on, SinkExt, StreamExt};
-use heimdallr::tele_in::{storage, Settings};
+use heimdallr::tele_in::{storage, Settings, TxSender};
 use std::cell::RefCell;
 
 #[tokio::main]
@@ -25,9 +25,14 @@ async fn main() -> anyhow::Result<()> {
         .expect("Error setting Ctrl-C handler");
     }
 
-    let _dbpool = storage::from_config(&settings).await?;
+    let dbpool = storage::from_config(&settings).await?;
+    let tx_sender = TxSender::from_config_with_pool(&settings, dbpool);
+    let tx_sender_task_handle = tx_sender.run();
 
     tokio::select! {
+        _ = async { tx_sender_task_handle.await } => {
+            panic!("InternalTx Sender actor is not supposed to finish its execution")
+        },
         _ = async { stop_signal_receiver.next().await } => {
             log::warn!("Stop signal received, shutting down");
         }
