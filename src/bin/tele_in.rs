@@ -28,10 +28,10 @@ async fn main() -> anyhow::Result<()> {
     let dbpool = storage::from_config(&settings).await?;
 
     let tx_proposer = TxProposer::from_config_with_pool(&settings, dbpool.clone());
-    let tx_proposer_task_handle = tx_proposer.run();
+    let tx_proposer_task_handle = tokio::spawn(async move { tx_proposer.run().await });
 
     let tx_sender = TxSender::from_config_with_pool(&settings, dbpool);
-    let tx_sender_task_handle = tx_sender.run();
+    let tx_sender_task_handle = tokio::spawn(async move { tx_sender.run().await });
 
     tokio::select! {
         _ = async { tx_proposer_task_handle.await } => {
