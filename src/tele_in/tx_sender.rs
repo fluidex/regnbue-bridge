@@ -4,7 +4,7 @@ use crate::tele_in::{storage::models, Settings};
 use anyhow::anyhow;
 use std::time::Duration;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct TxSender {
     connpool: PoolType,
     send_interval: Duration,
@@ -30,7 +30,7 @@ impl TxSender {
             timer.tick().await;
             log::debug!("ticktock!");
 
-            if let Err(e) = self.clone().run_inner().await {
+            if let Err(e) = self.run_inner().await {
                 log::error!("{}", e);
             };
         }
