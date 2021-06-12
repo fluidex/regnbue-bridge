@@ -41,9 +41,22 @@ impl TxSender {
         if task.is_none() {
             return Ok(());
         }
-        let _task = task.unwrap();
+        let task = task.unwrap();
 
-        unimplemented!()
+        // TODO: grpc send
+
+        self.mask_tx_sent(task.clone().id)
+            .await
+            .map_err(|_| anyhow!("mask_tx_sent in db"))?;
+
+        log::info!(
+            "({:?}) amout of asset ({:?}) sent to {:?} successfully!",
+            task.amount,
+            task.asset,
+            task.to_user
+        );
+
+        Ok(())
     }
 
     async fn claim_one_task(&self) -> Result<Option<models::InternalTx>, anyhow::Error> {
@@ -62,7 +75,7 @@ impl TxSender {
             .await?;
 
         if let Some(ref t) = fetch_res {
-            let stmt = format!("update {} set status = $1 where task_id = $2", models::tablenames::INTERNAL_TX);
+            let stmt = format!("update {} set status = $1 where id = $2", models::tablenames::INTERNAL_TX);
             sqlx::query(&stmt)
                 .bind(models::TxStatus::Claimed)
                 .bind(t.clone().id)
@@ -72,5 +85,15 @@ impl TxSender {
 
         tx.commit().await?;
         Ok(fetch_res)
+    }
+
+    async fn mask_tx_sent(&self, id: i32) -> Result<(), anyhow::Error> {
+        let stmt = format!("update {} set status = $1 where id = $2", models::tablenames::INTERNAL_TX);
+        sqlx::query(&stmt)
+            .bind(models::TxStatus::Sent)
+            .bind(id)
+            .execute(&self.connpool)
+            .await?;
+        Ok(())
     }
 }
