@@ -1,0 +1,3 @@
+[submodule "dingir-exchange"]
+	path = dingir-exchange
+	url = https://github.com/Fluidex/dingir-exchange
