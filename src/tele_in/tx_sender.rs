@@ -1,5 +1,5 @@
-use crate::storage::PoolType;
 use crate::grpc_client::GrpcClient;
+use crate::storage::PoolType;
 use crate::tele_in::Settings;
 use std::time::Duration;
 
