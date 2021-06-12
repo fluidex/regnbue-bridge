@@ -5,6 +5,7 @@ use std::time::Duration;
 pub struct Settings {
     pub send_interval: u64,
     pub db: String,
+    pub grpc_upstream: String,
 }
 
 impl Settings {
