@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use crate::storage::{DecimalDbType, TimestampDbType};
 
 pub mod tablenames {
     pub const InternalTx: &str = "internal_tx";
