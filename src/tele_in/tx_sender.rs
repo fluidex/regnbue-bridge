@@ -17,9 +17,12 @@ impl TxSender {
     }
 
     pub async fn run(&self) {
+        let mut timer = tokio::time::interval(self.send_interval);
+
         // TODO: use worker_pool for multiple workers
         loop {
-            tokio::time::delay_for(self.send_interval).await;
+            timer.tick().await;
+            log::debug!("ticktock!");
 
             if let Err(e) = self.run_inner().await {
                 log::error!("{}", e);
