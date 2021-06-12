@@ -15,7 +15,7 @@ pub enum TxStatus {
 
 #[derive(sqlx::FromRow, Debug, Clone, Serialize)]
 pub struct InternalTx {
-    pub id: TimestampDbType,
+    pub id: i32,
     pub to_user: i32,
     pub asset: String,
     pub amount: DecimalDbType,
