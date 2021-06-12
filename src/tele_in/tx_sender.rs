@@ -1,4 +1,5 @@
 use crate::storage::PoolType;
+use crate::grpc_client::GrpcClient;
 use crate::tele_in::Settings;
 use std::time::Duration;
 
@@ -6,6 +7,7 @@ use std::time::Duration;
 pub struct TxSender {
     connpool: PoolType,
     send_interval: Duration,
+    grpc_client: GrpcClient,
 }
 
 impl TxSender {
@@ -13,6 +15,9 @@ impl TxSender {
         Self {
             connpool,
             send_interval: config.send_interval(),
+            grpc_client: GrpcClient {
+                upstream: config.grpc_upstream.clone(),
+            },
         }
     }
 
