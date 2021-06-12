@@ -16,19 +16,15 @@ impl TxSender {
         }
     }
 
-    pub fn run(&self) -> tokio::task::JoinHandle<()> {
-        let mut timer = tokio::time::interval(self.send_interval);
-
+    pub async fn run(&self) {
         // TODO: use worker_pool for multiple workers
-        tokio::spawn(async move {
-            loop {
-                timer.tick().await;
-                log::debug!("ticktock!");
-                if let Err(e) = self.clone().run_inner().await {
-                    log::error!("{}", e);
-                };
-            }
-        })
+        loop {
+            tokio::time::delay_for(self.send_interval).await;
+
+            if let Err(e) = self.run_inner().await {
+                log::error!("{}", e);
+            };
+        }
     }
 
     async fn run_inner(&self) -> Result<(), anyhow::Error> {
