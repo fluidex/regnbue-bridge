@@ -1,4 +1,4 @@
-use crate::tele_out::storage::PoolType;
+use crate::storage::PoolType;
 use crate::tele_out::Settings;
 
 #[derive(Debug)]
