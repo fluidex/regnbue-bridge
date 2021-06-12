@@ -24,6 +24,10 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
+      - name: Pull submodules
+        run: |
+          git submodule update --init --recursive
+
       - name: Cache cargo registry
         uses: actions/cache@v2
         with:
