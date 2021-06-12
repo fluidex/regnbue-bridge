@@ -1,9 +1,10 @@
 use crate::grpc_client::GrpcClient;
 use crate::storage::PoolType;
-use crate::tele_in::Settings;
+use crate::tele_in::{storage::models, Settings};
+use anyhow::anyhow;
 use std::time::Duration;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TxSender {
     connpool: PoolType,
     send_interval: Duration,
@@ -29,13 +30,47 @@ impl TxSender {
             timer.tick().await;
             log::debug!("ticktock!");
 
-            if let Err(e) = self.run_inner().await {
+            if let Err(e) = self.clone().run_inner().await {
                 log::error!("{}", e);
             };
         }
     }
 
     async fn run_inner(&self) -> Result<(), anyhow::Error> {
+        let task = self.claim_one_task().await.map_err(|_| anyhow!("claim_one_task"))?;
+        if task.is_none() {
+            return Ok(());
+        }
+        let _task = task.unwrap();
+
         unimplemented!()
+    }
+
+    async fn claim_one_task(&self) -> Result<Option<models::InternalTx>, anyhow::Error> {
+        let mut tx = self.connpool.begin().await?;
+
+        let query = format!(
+            "select id, to_user, asset, amount, created_time, updated_time
+            from {}
+            where status = $1 limit 1",
+            models::tablenames::INTERNAL_TX
+        );
+
+        let fetch_res = sqlx::query_as::<_, models::InternalTx>(&query)
+            .bind(models::TxStatus::Proposed)
+            .fetch_optional(&mut tx)
+            .await?;
+
+        if let Some(ref t) = fetch_res {
+            let stmt = format!("update {} set status = $1 where task_id = $2", models::tablenames::INTERNAL_TX);
+            sqlx::query(&stmt)
+                .bind(models::TxStatus::Claimed)
+                .bind(t.clone().id)
+                .execute(&mut tx)
+                .await?;
+        };
+
+        tx.commit().await?;
+        Ok(fetch_res)
     }
 }

@@ -1,4 +1,4 @@
-CREATE TYPE tx_status AS ENUM('proposed', 'sent', 'confirmed');
+CREATE TYPE tx_status AS ENUM('proposed', 'claimed', 'sent', 'confirmed');
 
 CREATE TABLE internal_tx (
     id INT CHECK (id >= 0) NOT NULL PRIMARY KEY,
