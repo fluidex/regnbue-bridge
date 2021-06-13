@@ -1,5 +1,5 @@
+use crate::faucet::Settings;
 use crate::storage::PoolType;
-use crate::tele_in::Settings;
 
 #[derive(Debug)]
 pub struct TxProposer {

@@ -29,8 +29,8 @@ prost = "0.7.0"
 tonic-build = "0.4.0"
 
 [[bin]]
-name = "tele_in"
-path = "src/bin/tele_in.rs"
+name = "faucet"
+path = "src/bin/faucet.rs"
 
 [[bin]]
 name = "tele_out"
