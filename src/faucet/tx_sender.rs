@@ -1,6 +1,6 @@
+use crate::faucet::{storage::models, Settings};
 use crate::grpc_client::GrpcClient;
 use crate::storage::PoolType;
-use crate::tele_in::{storage::models, Settings};
 use anyhow::anyhow;
 use std::time::Duration;
 

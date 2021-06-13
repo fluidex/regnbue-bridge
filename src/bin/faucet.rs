@@ -1,15 +1,15 @@
 use futures::{channel::mpsc, executor::block_on, SinkExt, StreamExt};
-use heimdallr::tele_in::{storage, Settings, TxProposer, TxSender};
+use heimdallr::faucet::{storage, Settings, TxProposer, TxSender};
 use std::cell::RefCell;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
     env_logger::init();
-    log::info!("heimdallr tele_in started");
+    log::info!("heimdallr faucet started");
 
     let mut conf = config_rs::Config::new();
-    let config_file = dotenv::var("TELE_IN_CONFIG").unwrap();
+    let config_file = dotenv::var("FAUCET_CONFIG").unwrap();
     conf.merge(config_rs::File::with_name(&config_file)).unwrap();
     let settings: Settings = conf.try_into().unwrap();
     log::debug!("{:?}", settings);
