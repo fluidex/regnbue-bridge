@@ -1,3 +1,4 @@
+use crate::faucet::storage::models;
 use crate::faucet::Settings;
 use crate::storage::PoolType;
 use std::collections::HashMap;
@@ -18,5 +19,23 @@ impl TxProposer {
 
     pub async fn run(&self) {
         unimplemented!()
+    }
+
+    async fn propose_fundings(&self, user_id: i32) -> Result<(), anyhow::Error> {
+        for (asset, amount) in self.fundings {
+            let stmt = format!(
+                "insert into {} (to_user, asset, amount) values ($1, $2, $3)",
+                models::tablenames::FAUCET_TX
+            );
+            sqlx::query(&stmt)
+                .bind(user_id)
+                .bind(asset)
+                .bind(amount)
+                .execute(&self.connpool)
+                .await?;
+            // TODO: ignore err
+        }
+
+        Ok(())
     }
 }

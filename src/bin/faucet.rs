@@ -38,7 +38,7 @@ async fn main() -> anyhow::Result<()> {
             panic!("Tx Proposer actor is not supposed to finish its execution")
         },
         _ = async { tx_sender_task_handle.await } => {
-            panic!("InternalTx Sender actor is not supposed to finish its execution")
+            panic!("FaucetTx Sender actor is not supposed to finish its execution")
         },
         _ = async { stop_signal_receiver.next().await } => {
             log::warn!("Stop signal received, shutting down");

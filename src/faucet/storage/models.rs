@@ -2,7 +2,7 @@ use crate::storage::{DecimalDbType, TimestampDbType};
 use serde::Serialize;
 
 pub mod tablenames {
-    pub const INTERNAL_TX: &str = "internal_tx";
+    pub const FAUCET_TX: &str = "faucet_tx";
 }
 
 #[derive(sqlx::Type, Debug, Clone, Serialize)]
@@ -15,7 +15,7 @@ pub enum TxStatus {
 }
 
 #[derive(sqlx::FromRow, Debug, Clone, Serialize)]
-pub struct InternalTx {
+pub struct FaucetTx {
     pub id: i32,
     pub to_user: i32,
     pub asset: String,
