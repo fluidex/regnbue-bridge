@@ -9,7 +9,7 @@ pub struct GrpcClient {
 }
 
 impl GrpcClient {
-    pub async fn fund(&self, tx: &models::InternalTx) -> Result<BalanceUpdateResponse, anyhow::Error> {
+    pub async fn fund(&self, tx: &models::FaucetTx) -> Result<BalanceUpdateResponse, anyhow::Error> {
         let mut client = MatchengineClient::connect(self.upstream.clone()).await?;
 
         let request = tonic::Request::new(BalanceUpdateRequest {

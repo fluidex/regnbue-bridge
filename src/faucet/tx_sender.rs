@@ -59,23 +59,23 @@ impl TxSender {
         Ok(())
     }
 
-    async fn claim_one_task(&self) -> Result<Option<models::InternalTx>, anyhow::Error> {
+    async fn claim_one_task(&self) -> Result<Option<models::FaucetTx>, anyhow::Error> {
         let mut tx = self.connpool.begin().await?;
 
         let query = format!(
             "select id, to_user, asset, amount, created_time, updated_time
             from {}
             where status = $1 limit 1",
-            models::tablenames::INTERNAL_TX
+            models::tablenames::FAUCET_TX
         );
 
-        let fetch_res = sqlx::query_as::<_, models::InternalTx>(&query)
+        let fetch_res = sqlx::query_as::<_, models::FaucetTx>(&query)
             .bind(models::TxStatus::Proposed)
             .fetch_optional(&mut tx)
             .await?;
 
         if let Some(ref t) = fetch_res {
-            let stmt = format!("update {} set status = $1 where id = $2", models::tablenames::INTERNAL_TX);
+            let stmt = format!("update {} set status = $1 where id = $2", models::tablenames::FAUCET_TX);
             sqlx::query(&stmt)
                 .bind(models::TxStatus::Claimed)
                 .bind(t.clone().id)
@@ -88,7 +88,7 @@ impl TxSender {
     }
 
     async fn mark_fund_sent(&self, id: i32) -> Result<(), anyhow::Error> {
-        let stmt = format!("update {} set status = $1 where id = $2", models::tablenames::INTERNAL_TX);
+        let stmt = format!("update {} set status = $1 where id = $2", models::tablenames::FAUCET_TX);
         sqlx::query(&stmt)
             .bind(models::TxStatus::Sent)
             .bind(id)
