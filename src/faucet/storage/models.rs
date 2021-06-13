@@ -20,6 +20,7 @@ pub struct FaucetTx {
     pub to_user: i32,
     pub asset: String,
     pub amount: DecimalDbType,
+    pub status: TxStatus,
     pub created_time: TimestampDbType,
     pub updated_time: TimestampDbType,
 }
