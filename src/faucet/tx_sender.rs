@@ -6,7 +6,6 @@ use std::time::Duration;
 
 #[derive(Debug)]
 pub struct TxSender {
-    wallet_id: u32,
     connpool: PoolType,
     send_interval: Duration,
     grpc_client: GrpcClient,
@@ -15,7 +14,6 @@ pub struct TxSender {
 impl TxSender {
     pub fn from_config_with_pool(config: &Settings, connpool: PoolType) -> Self {
         Self {
-            wallet_id: config.wallet_id,
             connpool,
             send_interval: config.send_interval(),
             grpc_client: GrpcClient {
@@ -46,16 +44,16 @@ impl TxSender {
         let task = task.unwrap();
 
         self.grpc_client
-            .sent(self.wallet_id, &task)
+            .fund(&task)
             .await
             .map_err(|_| anyhow!("grpc_client send tx"))?;
 
-        self.mark_tx_sent(task.clone().id)
+        self.mark_fund_sent(task.clone().id)
             .await
-            .map_err(|_| anyhow!("mark_tx_sent in db"))?;
+            .map_err(|_| anyhow!("mark_fund_sent in db"))?;
 
         log::info!(
-            "({:?}) amout of asset ({:?}) sent to {:?} successfully!",
+            "({:?}) amout of asset ({:?}) funded to {:?} successfully!",
             task.amount,
             task.asset,
             task.to_user
@@ -92,7 +90,7 @@ impl TxSender {
         Ok(fetch_res)
     }
 
-    async fn mark_tx_sent(&self, id: i32) -> Result<(), anyhow::Error> {
+    async fn mark_fund_sent(&self, id: i32) -> Result<(), anyhow::Error> {
         let stmt = format!("update {} set status = $1 where id = $2", models::tablenames::INTERNAL_TX);
         sqlx::query(&stmt)
             .bind(models::TxStatus::Sent)

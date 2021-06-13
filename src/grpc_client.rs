@@ -9,18 +9,19 @@ pub struct GrpcClient {
 }
 
 impl GrpcClient {
-    pub async fn sent(&self, wallet_id: u32, tx: &models::InternalTx) -> Result<TransferResponse, anyhow::Error> {
+    pub async fn fund(&self, tx: &models::InternalTx) -> Result<BalanceUpdateResponse, anyhow::Error> {
         let mut client = MatchengineClient::connect(self.upstream.clone()).await?;
 
-        let request = tonic::Request::new(TransferRequest {
+        let request = tonic::Request::new(BalanceUpdateRequest {
+            user_id: tx.to_user as u32,
             asset: tx.asset.clone(),
+            business: "heimdallr_faucet".to_string(),
+            business_id: tx.id as u64,
             delta: tx.amount.to_string(),
-            from: wallet_id,
-            to: tx.to_user as u32,
-            memo: "fast_deposit".to_string(),
+            detail: tx.created_time.to_string(),
         });
-        log::debug!("grpc_client sending tx (id: {:?})", tx.id);
-        match client.transfer(request).await {
+        log::debug!("grpc_client sending faucet_tx (id: {:?})", tx.id);
+        match client.balance_update(request).await {
             Ok(resp) => Ok(resp.into_inner()),
             Err(e) => Err(anyhow!(e)),
         }
