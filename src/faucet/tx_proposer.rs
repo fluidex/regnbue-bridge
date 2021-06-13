@@ -21,28 +21,32 @@ impl TxProposer {
         unimplemented!()
     }
 
-    // TODO:
-    // 1. ignore error
-    // 2. fix types
+    // TODO: fix types
     async fn propose_fundings(&self, user_id: i32) -> Result<(), anyhow::Error> {
         for (asset, amount) in &self.fundings {
-            self.propose_funding(user_id, asset, amount).await?;
+            let stmt = format!(
+                "insert into {} (to_user, asset, amount) values ($1, $2, $3)",
+                models::tablenames::FAUCET_TX
+            );
+            match sqlx::query(&stmt)
+                .bind(user_id)
+                .bind(asset)
+                .bind(amount)
+                .execute(&self.connpool)
+                .await
+            {
+                Err(e) => {
+                    log::error!(
+                        "propose funding for user {:?}, asset: {:?}, amount: {:?} , error: {:?}",
+                        user_id,
+                        asset,
+                        amount,
+                        e
+                    )
+                }
+                _ => {}
+            }
         }
-
-        Ok(())
-    }
-
-    async fn propose_funding(&self, user_id: i32, asset: &str, amount: &str) -> Result<(), anyhow::Error> {
-        let stmt = format!(
-            "insert into {} (to_user, asset, amount) values ($1, $2, $3)",
-            models::tablenames::FAUCET_TX
-        );
-        sqlx::query(&stmt)
-            .bind(user_id)
-            .bind(asset)
-            .bind(amount)
-            .execute(&self.connpool)
-            .await?;
 
         Ok(())
     }
