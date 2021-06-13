@@ -12,7 +12,7 @@ impl TxProposer {
     pub fn from_config_with_pool(config: &Settings, connpool: PoolType) -> Self {
         Self {
             connpool,
-            fundings: config.fundings,
+            fundings: config.fundings.clone(),
         }
     }
 
