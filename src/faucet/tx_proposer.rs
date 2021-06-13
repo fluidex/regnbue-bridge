@@ -21,6 +21,9 @@ impl TxProposer {
         unimplemented!()
     }
 
+    // TODO:
+    // 1. ignore error
+    // 2. fix types
     async fn propose_fundings(&self, user_id: i32) -> Result<(), anyhow::Error> {
         for (asset, amount) in &self.fundings {
             self.propose_funding(user_id, asset, amount).await?;
