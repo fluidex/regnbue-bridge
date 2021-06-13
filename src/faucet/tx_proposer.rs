@@ -1,12 +1,12 @@
 use crate::faucet::storage::models;
 use crate::faucet::Settings;
-use crate::storage::PoolType;
+use crate::storage::{DecimalDbType, PoolType};
 use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct TxProposer {
     connpool: PoolType,
-    fundings: HashMap<String, String>, // TODO: use decimals
+    fundings: HashMap<String, DecimalDbType>,
 }
 
 impl TxProposer {
@@ -21,7 +21,6 @@ impl TxProposer {
         unimplemented!()
     }
 
-    // TODO: fix types
     async fn propose_fundings(&self, user_id: i32) -> Result<(), anyhow::Error> {
         for (asset, amount) in &self.fundings {
             let stmt = format!(
@@ -31,7 +30,7 @@ impl TxProposer {
             if let Err(e) = sqlx::query(&stmt)
                 .bind(user_id)
                 .bind(asset)
-                .bind(amount)
+                .bind(amount) // TODO: to_string?
                 .execute(&self.connpool)
                 .await
             {
