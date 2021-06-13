@@ -28,23 +28,20 @@ impl TxProposer {
                 "insert into {} (to_user, asset, amount) values ($1, $2, $3)",
                 models::tablenames::FAUCET_TX
             );
-            match sqlx::query(&stmt)
+            if let Err(e) = sqlx::query(&stmt)
                 .bind(user_id)
                 .bind(asset)
                 .bind(amount)
                 .execute(&self.connpool)
                 .await
             {
-                Err(e) => {
-                    log::error!(
-                        "propose funding for user {:?}, asset: {:?}, amount: {:?} , error: {:?}",
-                        user_id,
-                        asset,
-                        amount,
-                        e
-                    )
-                }
-                _ => {}
+                log::error!(
+                    "propose funding for user {:?}, asset: {:?}, amount: {:?} , error: {:?}",
+                    user_id,
+                    asset,
+                    amount,
+                    e
+                )
             }
         }
 
