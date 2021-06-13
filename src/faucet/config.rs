@@ -3,7 +3,6 @@ use std::time::Duration;
 
 #[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct Settings {
-    pub wallet_id: u32,
     pub send_interval: u64,
     pub db: String,
     pub grpc_upstream: String,
