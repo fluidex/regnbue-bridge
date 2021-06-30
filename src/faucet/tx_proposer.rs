@@ -27,7 +27,7 @@ impl TxProposer {
 
         for msg in msg_receiver.iter() {
             match msg {
-                WrappedMessage::USER(user) => {
+                WrappedMessage::User(user) => {
                     self.propose_fundings(user.user_id).await.unwrap();
                 }
             }

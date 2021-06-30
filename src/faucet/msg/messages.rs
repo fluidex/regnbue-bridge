@@ -1,10 +1,8 @@
-#![allow(clippy::upper_case_acronyms)]
-
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
 pub enum WrappedMessage {
-    USER(UserMessage),
+    User(UserMessage),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

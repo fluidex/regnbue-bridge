@@ -60,7 +60,7 @@ impl SimpleMessageHandler for &MessageWriter {
         let message = match msg_type {
             MSG_TYPE_USERS => {
                 let data = serde_json::from_str(msg_payload).unwrap();
-                WrappedMessage::USER(data)
+                WrappedMessage::User(data)
             }
             _ => unreachable!(),
         };
