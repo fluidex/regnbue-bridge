@@ -1,3 +1,4 @@
+brokers: '127.0.0.1:9092'
 fundings:
   eth: 100
   usdt: 10000
