@@ -6,6 +6,7 @@ use std::time::Duration;
 #[derive(Debug, Deserialize, Clone, PartialEq)]
 pub struct Settings {
     pub send_interval: u64,
+    pub brokers: String,
     pub db: String,
     pub grpc_upstream: String,
     pub fundings: HashMap<String, DecimalDbType>,

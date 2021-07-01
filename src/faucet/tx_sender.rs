@@ -37,13 +37,16 @@ impl TxSender {
     }
 
     async fn run_inner(&self) -> Result<(), anyhow::Error> {
-        let task = self.claim_one_task().await.map_err(|_| anyhow!("claim_one_task"))?;
+        let task = self.claim_one_task().await.map_err(|e| anyhow!("claim_one_task: {:?}", e))?;
         if task.is_none() {
             return Ok(());
         }
         let task = task.unwrap();
 
-        self.grpc_client.fund(&task).await.map_err(|_| anyhow!("grpc_client send tx"))?;
+        self.grpc_client
+            .fund(&task)
+            .await
+            .map_err(|e| anyhow!("grpc_client send tx: {:?}", e))?;
 
         self.mark_fund_sent(task.clone().id)
             .await
@@ -63,7 +66,7 @@ impl TxSender {
         let mut tx = self.connpool.begin().await?;
 
         let query = format!(
-            "select id, to_user, asset, amount, created_time, updated_time
+            "select id, to_user, asset, amount, status, created_time, updated_time
             from {}
             where status = $1 limit 1",
             models::tablenames::FAUCET_TX
