@@ -56,15 +56,13 @@ struct MessageWriter {
 impl SimpleMessageHandler for &MessageWriter {
     fn on_message(&self, msg: &BorrowedMessage<'_>) {
         let msg_type = std::str::from_utf8(msg.key().unwrap()).unwrap();
-        let msg_payload = std::str::from_utf8(msg.payload().unwrap()).unwrap();
-        let message = match msg_type {
-            MSG_TYPE_USERS => {
-                let data = serde_json::from_str(msg_payload).unwrap();
-                WrappedMessage::User(data)
-            }
-            _ => unreachable!(),
+        if msg_type != MSG_TYPE_USERS {
+            return;
         };
 
+        let msg_payload = std::str::from_utf8(msg.payload().unwrap()).unwrap();
+        let data = serde_json::from_str(msg_payload).unwrap();
+        let message = WrappedMessage::User(data);
         self.sender.try_send(message).unwrap();
     }
 }
