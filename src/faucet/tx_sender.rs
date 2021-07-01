@@ -43,7 +43,10 @@ impl TxSender {
         }
         let task = task.unwrap();
 
-        self.grpc_client.fund(&task).await.map_err(|e| anyhow!("grpc_client send tx: {:?}", e))?;
+        self.grpc_client
+            .fund(&task)
+            .await
+            .map_err(|e| anyhow!("grpc_client send tx: {:?}", e))?;
 
         self.mark_fund_sent(task.clone().id)
             .await
