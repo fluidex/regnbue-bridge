@@ -1,3 +1,5 @@
+use super::msg::messages::WrappedMessage;
+use super::msg::msg_loader::load_msgs_from_mq;
 use crate::faucet::storage::models;
 use crate::faucet::Settings;
 use crate::storage::{DecimalDbType, PoolType};
@@ -5,6 +7,7 @@ use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct TxProposer {
+    brokers: String,
     connpool: PoolType,
     fundings: HashMap<String, DecimalDbType>,
 }
@@ -12,13 +15,25 @@ pub struct TxProposer {
 impl TxProposer {
     pub fn from_config_with_pool(config: &Settings, connpool: PoolType) -> Self {
         Self {
+            brokers: config.brokers.to_owned(),
             connpool,
             fundings: config.fundings.clone(),
         }
     }
 
     pub async fn run(&self) {
-        unimplemented!()
+        let (msg_sender, msg_receiver) = crossbeam_channel::unbounded();
+        let loader_thread = load_msgs_from_mq(&self.brokers, msg_sender);
+
+        for msg in msg_receiver.iter() {
+            match msg {
+                WrappedMessage::User(user) => {
+                    self.propose_fundings(user.user_id).await.unwrap();
+                }
+            }
+        }
+
+        loader_thread.map(|h| h.join().expect("loader thread failed"));
     }
 
     async fn propose_fundings(&self, user_id: i32) -> Result<(), anyhow::Error> {
