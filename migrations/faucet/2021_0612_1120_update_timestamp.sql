@@ -7,5 +7,5 @@ END;
 $$ language 'plpgsql';
 
 CREATE TRIGGER update_timestamp BEFORE UPDATE
-ON task FOR EACH ROW EXECUTE PROCEDURE
+ON faucet_tx FOR EACH ROW EXECUTE PROCEDURE
 update_timestamp();
