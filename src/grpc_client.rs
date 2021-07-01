@@ -18,7 +18,7 @@ impl GrpcClient {
             business: "heimdallr_faucet".to_string(),
             business_id: tx.id as u64,
             delta: tx.amount.to_string(),
-            detail: tx.created_time.to_string(),
+            detail: "".to_string(), // TODO: fix
         });
         log::debug!("grpc_client sending faucet_tx (id: {:?})", tx.id);
         match client.balance_update(request).await {
