@@ -34,7 +34,7 @@ pub fn load_msgs_from_mq(
 
                 tokio::select! {
                     _ = tokio::signal::ctrl_c() => {
-                        log::info!("Ctrl-c received, shutting down");
+                        log::warn!("Ctrl-c received, shutting down");
                         break;
                     },
 
