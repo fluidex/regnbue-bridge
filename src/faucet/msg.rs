@@ -1,5 +1,5 @@
-use super::messages::WrappedMessage;
-use super::msg_consumer::{Simple, SimpleConsumer, SimpleMessageHandler};
+use crate::mq::messages::WrappedMessage;
+use crate::mq::msg_consumer::{Simple, SimpleConsumer, SimpleMessageHandler};
 use rdkafka::consumer::StreamConsumer;
 use rdkafka::message::{BorrowedMessage, Message};
 

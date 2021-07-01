@@ -1,7 +1,7 @@
-use super::msg::messages::WrappedMessage;
-use super::msg::msg_loader::load_msgs_from_mq;
+use super::msg::load_msgs_from_mq;
 use crate::faucet::storage::models;
 use crate::faucet::Settings;
+use crate::mq::messages::WrappedMessage;
 use crate::storage::{DecimalDbType, PoolType};
 use std::collections::HashMap;
 
