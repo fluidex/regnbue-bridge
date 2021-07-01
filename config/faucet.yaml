@@ -1,5 +1,6 @@
 brokers: '127.0.0.1:9092'
 db: postgres://heimdallr:heimdallr_AA9944@127.0.0.1:5436/heimdallr
+grpc_upstream: "http://[::1]:50051"
 send_interval: 3000
 fundings:
   eth: 100
