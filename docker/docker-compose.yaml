@@ -1,0 +1,14 @@
+version: '3.4'
+services:
+  db:
+    image: timescale/timescaledb:2.1.0-pg13
+    container_name: heimdallr_pq
+    restart: always
+    volumes:
+      - ./data/volumes/postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5436:5432"
+    environment:
+      POSTGRES_DB: heimdallr
+      POSTGRES_USER: heimdallr
+      POSTGRES_PASSWORD: heimdallr_AA9944
