@@ -10,20 +10,20 @@ pub fn load_msgs_from_mq(
     brokers: &str,
     sender: crossbeam_channel::Sender<WrappedMessage>,
 ) -> Option<std::thread::JoinHandle<anyhow::Result<()>>> {
-    let brokers = brokers.to_owned();
+    let consumer: StreamConsumer = rdkafka::config::ClientConfig::new()
+        .set("bootstrap.servers", brokers)
+        .set("group.id", "faucet_msg_consumer")
+        .set("enable.partition.eof", "false")
+        .set("session.timeout.ms", "6000")
+        .set("enable.auto.commit", "true")
+        .set("auto.offset.reset", "earliest")
+        .create()
+        .unwrap();
+    let writer = MessageWriter { sender };
+
     Some(std::thread::spawn(move || {
-        let writer = MessageWriter { sender };
         let rt: tokio::runtime::Runtime = tokio::runtime::Builder::new_multi_thread().enable_all().build().unwrap();
         rt.block_on(async move {
-            let consumer: StreamConsumer = rdkafka::config::ClientConfig::new()
-                .set("bootstrap.servers", brokers)
-                .set("group.id", "faucet_msg_consumer")
-                .set("enable.partition.eof", "false")
-                .set("session.timeout.ms", "6000")
-                .set("enable.auto.commit", "true")
-                .set("auto.offset.reset", "earliest")
-                .create()
-                .unwrap();
             let consumer = std::sync::Arc::new(consumer);
             let cr_main = SimpleConsumer::new(consumer.as_ref())
                 .add_topic(UNIFY_TOPIC, Simple::from(&writer))
