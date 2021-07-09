@@ -24,8 +24,7 @@ pub fn load_msgs_from_mq(
     Some(std::thread::spawn(move || {
         let rt: tokio::runtime::Runtime = tokio::runtime::Builder::new_multi_thread().enable_all().build().unwrap();
         rt.block_on(async move {
-            let consumer = std::sync::Arc::new(consumer);
-            let cr_main = SimpleConsumer::new(consumer.as_ref())
+            let cr_main = SimpleConsumer::new(&consumer)
                 .add_topic(UNIFY_TOPIC, Simple::from(&writer))
                 .unwrap();
             tokio::select! {
