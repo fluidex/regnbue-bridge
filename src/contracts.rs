@@ -11,6 +11,7 @@ fn read_file_to_json_value(path: &str) -> io::Result<serde_json::Value> {
     Ok(val)
 }
 
+// TODO: better error handling
 pub fn get_abi(path: &str) -> Result<Contract, anyhow::Error> {
     let abi_string = read_file_to_json_value(path)
         .expect("couldn't read CONTRACT_FILE")
