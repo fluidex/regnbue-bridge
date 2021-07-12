@@ -1,5 +1,6 @@
 use crate::storage::PoolType;
 use crate::tele_out::Settings;
+use crate::contracts;
 use crossbeam_channel::Receiver;
 use web3::types::Address;
 
@@ -11,6 +12,7 @@ pub struct EthSender {
 impl EthSender {
     pub fn from_config_with_pool(config: &Settings, connpool: PoolType) -> Result<Self, anyhow::Error> {
         let address = config.contract_address.parse::<Address>()?;
+        let abi = contracts::get_abi(&config.contract_abi_file_path)?;
 
         Ok(Self { connpool })
     }
