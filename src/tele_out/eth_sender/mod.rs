@@ -24,6 +24,8 @@ impl EthSender {
             if let Err(e) = action.await {
                 log::error!("{:?}", e);
             };
+
+            // TODO: save to db
         }
     }
 
