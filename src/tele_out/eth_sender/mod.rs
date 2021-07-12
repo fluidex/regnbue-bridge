@@ -9,11 +9,10 @@ pub struct EthSender {
 }
 
 impl EthSender {
-    // TODO: error handling
-    pub fn from_config_with_pool(config: &Settings, connpool: PoolType) -> Self {
-        let address = config.contract_address.parse::<Address>().unwrap();
+    pub fn from_config_with_pool(config: &Settings, connpool: PoolType) -> Result<Self, anyhow::Error> {
+        let address = config.contract_address.parse::<Address>()?;
 
-        Self { connpool }
+        Ok(Self { connpool })
     }
 
     pub async fn run(&self, rx: Receiver<super::ContractCall>) {
