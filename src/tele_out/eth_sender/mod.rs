@@ -19,6 +19,16 @@ impl EthSender {
     pub async fn run(&self, rx: Receiver<super::ContractCall>) {
         for call in rx.iter() {
             log::debug!("{:?}", call);
+            let action = match call {
+                super::ContractCall::SubmitProof(data) => self.submit_proof(data),
+            };
+            if let Err(e) = action.await {
+                log::error!("{:?}", e);
+            };
         }
+    }
+
+    pub async fn submit_proof(&self, data: super::ProofData) -> Result<(), anyhow::Error> {
+        Ok(())
     }
 }

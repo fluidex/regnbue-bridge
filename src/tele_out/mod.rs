@@ -9,5 +9,8 @@ pub use task_fetcher::TaskFetcher;
 
 #[derive(Debug)]
 pub enum ContractCall {
-    SubmitProof,
+    SubmitProof(ProofData),
 }
+
+#[derive(Debug)]
+pub struct ProofData {}
