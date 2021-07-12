@@ -12,8 +12,7 @@ impl TaskFetcher {
         Self { connpool }
     }
 
-    // TODO: use eth_tx type
-    pub async fn run(&self, tx: Sender<String>) {
+    pub async fn run(&self, tx: Sender<super::ContractCall>) {
         unimplemented!()
     }
 }

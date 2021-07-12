@@ -16,8 +16,9 @@ impl EthSender {
         Self { connpool }
     }
 
-    // TODO: use eth_tx type
-    pub async fn run(&self, rx: Receiver<String>) {
-        unimplemented!()
+    pub async fn run(&self, rx: Receiver<super::ContractCall>) {
+        for call in rx.iter() {
+            log::debug!("{:?}", call);
+        }
     }
 }
