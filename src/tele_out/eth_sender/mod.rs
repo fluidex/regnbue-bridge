@@ -1,3 +1,4 @@
+use super::types::{ContractCall, ProofData};
 use crate::contracts;
 use crate::storage::PoolType;
 use crate::tele_out::Settings;
@@ -17,11 +18,11 @@ impl EthSender {
         Ok(Self { connpool })
     }
 
-    pub async fn run(&self, rx: Receiver<super::ContractCall>) {
+    pub async fn run(&self, rx: Receiver<ContractCall>) {
         for call in rx.iter() {
             log::debug!("{:?}", call);
             let action = match call {
-                super::ContractCall::SubmitProof(data) => self.submit_proof(data),
+                ContractCall::SubmitProof(data) => self.submit_proof(data),
             };
             if let Err(e) = action.await {
                 log::error!("{:?}", e);
@@ -31,7 +32,7 @@ impl EthSender {
         }
     }
 
-    pub async fn submit_proof(&self, data: super::ProofData) -> Result<(), anyhow::Error> {
+    pub async fn submit_proof(&self, data: ProofData) -> Result<(), anyhow::Error> {
         Ok(())
     }
 }
