@@ -1,5 +1,6 @@
 use crate::storage::PoolType;
 use crate::tele_out::Settings;
+use crossbeam_channel::Receiver;
 
 #[derive(Debug)]
 pub struct EthSender {
@@ -11,7 +12,8 @@ impl EthSender {
         Self { connpool }
     }
 
-    pub async fn run(&self) {
+    // TODO: use eth_tx type
+    pub async fn run(&self, rx: Receiver<String>) {
         unimplemented!()
     }
 }

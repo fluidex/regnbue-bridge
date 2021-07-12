@@ -1,5 +1,6 @@
 use crate::storage::PoolType;
 use crate::tele_out::Settings;
+use crossbeam_channel::Sender;
 
 #[derive(Debug)]
 pub struct TaskFetcher {
@@ -11,7 +12,8 @@ impl TaskFetcher {
         Self { connpool }
     }
 
-    pub async fn run(&self) {
+    // TODO: use eth_tx type
+    pub async fn run(&self, tx: Sender<String>) {
         unimplemented!()
     }
 }
