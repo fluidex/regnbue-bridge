@@ -1,6 +1,7 @@
 use crate::storage::PoolType;
 use crate::tele_out::Settings;
 use crossbeam_channel::Receiver;
+use web3::types::Address;
 
 #[derive(Debug)]
 pub struct EthSender {
@@ -8,7 +9,10 @@ pub struct EthSender {
 }
 
 impl EthSender {
-    pub fn from_config_with_pool(_config: &Settings, connpool: PoolType) -> Self {
+    // TODO: error handling
+    pub fn from_config_with_pool(config: &Settings, connpool: PoolType) -> Self {
+        let address = config.contract_address.parse::<Address>().unwrap();
+
         Self { connpool }
     }
 
