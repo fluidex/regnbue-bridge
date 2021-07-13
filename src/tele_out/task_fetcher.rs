@@ -43,8 +43,8 @@ impl TaskFetcher {
             let serialized_proof: Vec<U256> = serde_json::from_str(&serialized_proof_string)?;
             tx.try_send(ContractCall::SubmitProof(ProofData {
                 block_id: task.block_id.into(),
-                public_inputs: public_inputs,
-                serialized_proof: serialized_proof,
+                public_inputs,
+                serialized_proof,
             }))?;
         }
 
