@@ -2,6 +2,7 @@ use super::types::{models, ContractCall, ProofData};
 use crate::storage::PoolType;
 use crate::tele_out::Settings;
 use crossbeam_channel::Sender;
+use std::time::Duration;
 
 #[derive(Debug)]
 pub struct TaskFetcher {
@@ -14,19 +15,19 @@ impl TaskFetcher {
     }
 
     pub async fn run(&self, tx: Sender<ContractCall>) {
-        let mut timer = tokio::time::interval(self.send_interval);
+        let mut timer = tokio::time::interval(Duration::from_secs(1));
 
         loop {
             timer.tick().await;
             log::debug!("ticktock!");
 
-            if let Err(e) = self.run_inner(tx).await {
+            if let Err(e) = self.run_inner(&tx).await {
                 log::error!("{}", e);
             };
         }
     }
 
-    async fn run_inner(&self, tx: Sender<ContractCall>) -> Result<(), anyhow::Error>{
+    async fn run_inner(&self, tx: &Sender<ContractCall>) -> Result<(), anyhow::Error>{
         let query = format!("select * from {} where status = $1 LIMIT 1", models::tablenames::TASK);
         let task: Option<models::Task> = sqlx::query_as(&query)
             .bind(models::TaskStatus::Proved)
