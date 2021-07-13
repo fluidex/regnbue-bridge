@@ -34,7 +34,7 @@ pub mod models {
     #[sqlx(type_name = "varchar")]
     #[sqlx(rename_all = "lowercase")]
     pub enum CircuitType {
-        BLOCK,
+        Block,
     }
 
     #[derive(sqlx::FromRow, Debug, Clone, Serialize)]
