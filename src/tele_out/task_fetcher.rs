@@ -1,5 +1,7 @@
+use super::types::ContractCall;
 use crate::storage::PoolType;
 use crate::tele_out::Settings;
+use crossbeam_channel::Sender;
 
 #[derive(Debug)]
 pub struct TaskFetcher {
@@ -11,7 +13,7 @@ impl TaskFetcher {
         Self { connpool }
     }
 
-    pub async fn run(&self) {
+    pub async fn run(&self, _tx: Sender<ContractCall>) {
         unimplemented!()
     }
 }

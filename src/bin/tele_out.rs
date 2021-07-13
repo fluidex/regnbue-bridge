@@ -27,10 +27,11 @@ async fn main() -> anyhow::Result<()> {
 
     // TODO: maybe separate and have: 1. consumer 2. producer 3. sender
     let dbpool = storage::from_config(&settings).await?;
+    let (tx, rx) = crossbeam_channel::unbounded();
     let fetcher = TaskFetcher::from_config_with_pool(&settings, dbpool.clone());
-    let fetcher_task_handle = tokio::spawn(async move { fetcher.run().await });
-    let eth_sender = EthSender::from_config_with_pool(&settings, dbpool);
-    let eth_sender_task_handle = tokio::spawn(async move { eth_sender.run().await });
+    let fetcher_task_handle = tokio::spawn(async move { fetcher.run(tx).await });
+    let eth_sender = EthSender::from_config_with_pool(&settings, dbpool)?;
+    let eth_sender_task_handle = tokio::spawn(async move { eth_sender.run(rx).await });
 
     tokio::select! {
         _ = async { fetcher_task_handle.await } => {
