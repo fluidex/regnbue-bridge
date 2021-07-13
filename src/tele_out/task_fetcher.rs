@@ -1,4 +1,4 @@
-use super::types::{ContractCall, models};
+use super::types::{models, ContractCall, ProofData};
 use crate::storage::PoolType;
 use crate::tele_out::Settings;
 use crossbeam_channel::Sender;
@@ -21,7 +21,9 @@ impl TaskFetcher {
         let query = "select * from task where status = 'proved' LIMIT 1";
         // TODO: error handling
         let task: Option<models::Task> = sqlx::query_as(&query).fetch_optional(&self.connpool).await.unwrap();
-
-        unimplemented!()
+        if task.is_some() {
+            let task = task.unwrap();
+            tx.try_send(ContractCall::SubmitProof(ProofData { block_id: task.block_id }));
+        }
     }
 }
