@@ -5,8 +5,8 @@ use crate::tele_out::Settings;
 use crossbeam_channel::Receiver;
 use ethers::{
     abi::Abi,
-    providers::{Http, Provider},
     contract::Contract,
+    providers::{Http, Provider},
     types::Address,
 };
 use std::convert::TryFrom;
