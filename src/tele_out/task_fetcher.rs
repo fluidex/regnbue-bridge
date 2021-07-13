@@ -23,7 +23,11 @@ impl TaskFetcher {
         let task: Option<models::Task> = sqlx::query_as(&query).fetch_optional(&self.connpool).await.unwrap();
         if task.is_some() {
             let task = task.unwrap();
-            tx.try_send(ContractCall::SubmitProof(ProofData { block_id: task.block_id }));
+            tx.try_send(ContractCall::SubmitProof(ProofData {
+                block_id: task.block_id.into(),
+                public_inputs: vec![],
+                serialized_proof: vec![],
+            })).unwrap();
         }
     }
 }
