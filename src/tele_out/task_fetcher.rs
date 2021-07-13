@@ -1,4 +1,4 @@
-use super::types::ContractCall;
+use super::types::{ContractCall, models};
 use crate::storage::PoolType;
 use crate::tele_out::Settings;
 use crossbeam_channel::Sender;
@@ -13,7 +13,15 @@ impl TaskFetcher {
         Self { connpool }
     }
 
+    // TODO: better type binding
     pub async fn run(&self, tx: Sender<ContractCall>) {
+        // TODO: ticker loop
+
+        // TOOD: can we use super::types directly?
+        let query = "select * from task where status = 'proved' LIMIT 1";
+        // TODO: error handling
+        let task: Option<models::Task> = sqlx::query_as(&query).fetch_optional(&self.connpool).await.unwrap();
+
         unimplemented!()
     }
 }
