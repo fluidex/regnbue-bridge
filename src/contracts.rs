@@ -16,5 +16,5 @@ pub fn get_abi(path: &str) -> Result<Abi, anyhow::Error> {
         .get("abi")
         .ok_or(anyhow!("couldn't get abi from CONTRACT_FILE"))?
         .to_string();
-    serde_json::from_str(&abi_string).map_err(|_| anyhow!("serde_json"))
+    serde_json::from_str(&abi_string).map_err(|e| anyhow!("{:?}", e))
 }
