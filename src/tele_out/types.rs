@@ -16,6 +16,10 @@ pub mod models {
     use serde::{Deserialize, Serialize};
     pub type TimestampDbType = chrono::NaiveDateTime;
 
+    pub mod tablenames {
+        pub const TASK: &str = "task";
+    }
+
     #[derive(sqlx::Type, Debug, Clone, Serialize)]
     #[sqlx(type_name = "task_status", rename_all = "snake_case")]
     pub enum TaskStatus {

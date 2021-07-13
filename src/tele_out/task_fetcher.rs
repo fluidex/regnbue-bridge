@@ -17,10 +17,13 @@ impl TaskFetcher {
     pub async fn run(&self, tx: Sender<ContractCall>) {
         // TODO: ticker loop
 
-        // TOOD: can we use super::types directly?
-        let query = "select * from task where status = 'proved' LIMIT 1";
+        let query = format!("select * from {} where status = $1 LIMIT 1", models::tablenames::TASK);
         // TODO: error handling
-        let task: Option<models::Task> = sqlx::query_as(&query).fetch_optional(&self.connpool).await.unwrap();
+        let task: Option<models::Task> = sqlx::query_as(&query)
+            .bind(models::TaskStatus::Proved)
+            .fetch_optional(&self.connpool)
+            .await
+            .unwrap();
         if task.is_some() {
             let task = task.unwrap();
             tx.try_send(ContractCall::SubmitProof(ProofData {
