@@ -13,7 +13,7 @@ impl TaskFetcher {
         Self { connpool }
     }
 
-    pub async fn run(&self, tx: Sender<ContractCall>) {
+    pub async fn run(&self, _tx: Sender<ContractCall>) {
         unimplemented!()
     }
 }
