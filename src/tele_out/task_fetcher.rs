@@ -2,6 +2,7 @@ use super::types::{models, ContractCall, ProofData};
 use crate::storage::PoolType;
 use crate::tele_out::Settings;
 use crossbeam_channel::Sender;
+use ethers::types::U256;
 use std::time::Duration;
 
 #[derive(Debug)]
@@ -36,10 +37,14 @@ impl TaskFetcher {
 
         if task.is_some() {
             let task = task.unwrap();
+            let public_inputs_string = String::from_utf8(task.public_input.unwrap())?;
+            let serialized_proof_string = String::from_utf8(task.proof.unwrap())?;
+            let public_inputs: Vec<U256> = serde_json::from_str(&public_inputs_string)?;
+            let serialized_proof: Vec<U256> = serde_json::from_str(&serialized_proof_string)?;
             tx.try_send(ContractCall::SubmitProof(ProofData {
                 block_id: task.block_id.into(),
-                public_inputs: vec![],
-                serialized_proof: vec![],
+                public_inputs: public_inputs,
+                serialized_proof: serialized_proof,
             }))?;
         }
 
