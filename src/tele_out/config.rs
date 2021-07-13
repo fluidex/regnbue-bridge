@@ -6,4 +6,5 @@ pub struct Settings {
     pub contract_address: String,
     pub contract_abi_file_path: String,
     pub web3_url: String,
+    pub confirmations: usize, // TODO: default
 }

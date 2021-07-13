@@ -7,7 +7,7 @@ use ethers::{
     abi::Abi,
     contract::Contract,
     providers::{Http, Provider},
-    types::Address,
+    types::{Address, H256},
 };
 use std::convert::TryFrom;
 
@@ -15,6 +15,7 @@ use std::convert::TryFrom;
 pub struct EthSender {
     connpool: PoolType,
     contract: Contract<Provider<Http>>,
+    confirmations: usize,
 }
 
 impl EthSender {
@@ -24,7 +25,11 @@ impl EthSender {
         let client = Provider::<Http>::try_from(config.web3_url.as_str())?; // assume wallet inside
         let contract = Contract::new(address, abi, client);
 
-        Ok(Self { connpool, contract })
+        Ok(Self {
+            connpool,
+            contract,
+            confirmations: config.confirmations,
+        })
     }
 
     pub async fn run(&self, rx: Receiver<ContractCall>) {
@@ -42,6 +47,11 @@ impl EthSender {
     }
 
     pub async fn submit_proof(&self, data: ProofData) -> Result<(), anyhow::Error> {
+        let call = self
+            .contract
+            .method::<_, H256>("submitBlock", (data.block_id, data.public_inputs, data.serialized_proof))?;
+        let pending_tx = call.send().await?;
+        let _receipt = pending_tx.confirmations(self.confirmations).await?;
         Ok(())
     }
 }

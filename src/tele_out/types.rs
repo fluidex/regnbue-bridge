@@ -7,7 +7,7 @@ pub enum ContractCall {
 
 #[derive(Debug)]
 pub struct ProofData {
-    block_id: U256,
-    public_inputs: U256,
-    serialized_proof: U256,
+    pub block_id: U256,
+    pub public_inputs: U256,
+    pub serialized_proof: U256,
 }
