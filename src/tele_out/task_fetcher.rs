@@ -27,7 +27,8 @@ impl TaskFetcher {
                 block_id: task.block_id.into(),
                 public_inputs: vec![],
                 serialized_proof: vec![],
-            })).unwrap();
+            }))
+            .unwrap();
         }
     }
 }
