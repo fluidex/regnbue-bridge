@@ -1,5 +1,5 @@
 use anyhow::anyhow;
-use ethabi::Contract;
+use ethers::abi::Contract;
 use std::fs;
 use std::io;
 use std::str::FromStr;
