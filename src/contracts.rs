@@ -14,7 +14,7 @@ fn read_file_to_json_value(path: &str) -> io::Result<serde_json::Value> {
 pub fn get_abi(path: &str) -> Result<Abi, anyhow::Error> {
     let abi_string = read_file_to_json_value(path)?
         .get("abi")
-        .ok_or(anyhow!("couldn't get abi from CONTRACT_FILE"))?
+        .ok_or_else(|| anyhow!("couldn't get abi from CONTRACT_FILE"))?
         .to_string();
     serde_json::from_str(&abi_string).map_err(|e| anyhow!("{:?}", e))
 }
