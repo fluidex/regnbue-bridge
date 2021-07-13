@@ -3,7 +3,7 @@ use crate::contracts;
 use crate::storage::PoolType;
 use crate::tele_out::Settings;
 use crossbeam_channel::Receiver;
-use web3::types::Address;
+use ethers::types::Address;
 
 #[derive(Debug)]
 pub struct EthSender {

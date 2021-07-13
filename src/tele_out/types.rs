@@ -1,4 +1,4 @@
-use web3::types::U256;
+use ethers::types::U256;
 
 #[derive(Debug)]
 pub enum ContractCall {
