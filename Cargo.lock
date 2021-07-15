@@ -1200,7 +1200,6 @@ dependencies = [
  "prost-types",
  "rdkafka",
  "rust_decimal",
- "rust_decimal_macros",
  "serde 1.0.126",
  "serde_json",
  "sqlx",
@@ -2359,16 +2358,6 @@ dependencies = [
  "num-traits 0.2.14",
  "postgres",
  "serde 1.0.126",
-]
-
-[[package]]
-name = "rust_decimal_macros"
-version = "1.14.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9ac0a0a5fcc647fd50ad212f7806cc36e5551684ddb7d5d8522d788035f7893"
-dependencies = [
- "quote",
- "rust_decimal",
 ]
 
 [[package]]
