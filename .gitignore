@@ -15,3 +15,5 @@
 /target
 
 *.log
+
+config/tele_out.yaml
