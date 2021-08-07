@@ -28,6 +28,8 @@ impl GrpcClient {
     }
 
     pub async fn mock_transfer(&self, tx: &models::FaucetTx) -> Result<TransferResponse, anyhow::Error> {
+        assert!(tx.to_user > 1);
+
         let mut client = MatchengineClient::connect(self.upstream.clone()).await?;
 
         let request = tonic::Request::new(TransferRequest {
