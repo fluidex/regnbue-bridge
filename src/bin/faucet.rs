@@ -1,3 +1,4 @@
+use fluidex_common::non_blocking_tracing;
 use futures::{channel::mpsc, executor::block_on, SinkExt, StreamExt};
 use heimdallr::faucet::{storage, Settings, TxProposer, TxSender};
 use std::cell::RefCell;
@@ -5,7 +6,7 @@ use std::cell::RefCell;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
-    env_logger::init();
+    let _guard = non_blocking_tracing::setup();
     log::info!("heimdallr faucet started");
 
     let mut conf = config_rs::Config::new();
