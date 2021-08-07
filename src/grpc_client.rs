@@ -37,7 +37,7 @@ impl GrpcClient {
             to: (tx.to_user - 1) as u32,
             asset: tx.asset.clone(),
             delta: "0.1".to_string(),
-            memo: "facet_mock_transfer".to_string(),
+            memo: serde_json::json!({"id": "", "mock_transfer_tx time": tx.created_time}).to_string(),
         });
         log::debug!("grpc_client sending transfer_tx (id: {:?})", tx.id);
         match client.transfer(request).await {
