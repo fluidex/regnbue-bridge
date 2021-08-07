@@ -26,4 +26,21 @@ impl GrpcClient {
             Err(e) => Err(anyhow!(e)),
         }
     }
+
+    pub async fn mock_transfer(&self, tx: &models::FaucetTx) -> Result<TransferResponse, anyhow::Error> {
+        let mut client = MatchengineClient::connect(self.upstream.clone()).await?;
+
+        let request = tonic::Request::new(TransferRequest {
+            from: tx.to_user as u32,
+            to: (tx.to_user - 1) as u32,
+            asset: tx.asset.clone(),
+            delta: "0.1".to_string(),
+            memo: "facet_mock_transfer".to_string(),
+        });
+        log::debug!("grpc_client sending transfer_tx (id: {:?})", tx.id);
+        match client.transfer(request).await {
+            Ok(resp) => Ok(resp.into_inner()),
+            Err(e) => Err(anyhow!(e)),
+        }
+    }
 }
