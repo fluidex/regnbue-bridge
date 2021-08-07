@@ -31,8 +31,8 @@ impl TaskFetcher {
 
     async fn run_inner(&self, tx: &Sender<ContractCall>) -> Result<(), anyhow::Error> {
         let query = format!("select * from {} where status = $1 LIMIT 1", models::tablenames::TASK);
-        let task: Option<models::task::Task> = sqlx::query_as(&query)
-            .bind(models::task::TaskStatus::Proved)
+        let task: Option<models::Task> = sqlx::query_as(&query)
+            .bind(models::TaskStatus::Proved)
             .fetch_optional(&self.connpool)
             .await?;
 
