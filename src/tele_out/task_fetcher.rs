@@ -1,8 +1,9 @@
-use super::types::{models, ContractCall, ProofData};
+use super::types::{ContractCall, ProofData};
 use crate::storage::PoolType;
 use crate::tele_out::Settings;
 use crossbeam_channel::Sender;
 use ethers::types::U256;
+use fluidex_common::db::models;
 use std::time::Duration;
 
 #[derive(Debug)]
@@ -30,8 +31,8 @@ impl TaskFetcher {
 
     async fn run_inner(&self, tx: &Sender<ContractCall>) -> Result<(), anyhow::Error> {
         let query = format!("select * from {} where status = $1 LIMIT 1", models::tablenames::TASK);
-        let task: Option<models::Task> = sqlx::query_as(&query)
-            .bind(models::TaskStatus::Proved)
+        let task: Option<models::task::Task> = sqlx::query_as(&query)
+            .bind(models::task::TaskStatus::Proved)
             .fetch_optional(&self.connpool)
             .await?;
 
