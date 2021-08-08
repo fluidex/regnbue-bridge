@@ -1,4 +1,4 @@
-use super::types::{ContractCall, ProofData};
+use super::types::{ContractCall, SubmitBlockArgs};
 use crate::storage::PoolType;
 use crate::tele_out::Settings;
 use crossbeam_channel::Sender;
@@ -40,7 +40,7 @@ impl TaskFetcher {
             let task = task.unwrap();
             let public_inputs: Vec<U256> = serde_json::de::from_slice(&task.public_input.unwrap())?;
             let serialized_proof: Vec<U256> = serde_json::de::from_slice(&task.proof.unwrap())?;
-            tx.try_send(ContractCall::SubmitProof(ProofData {
+            tx.try_send(ContractCall::SubmitBlock(SubmitBlockArgs {
                 block_id: task.block_id.into(),
                 public_inputs,
                 serialized_proof,
