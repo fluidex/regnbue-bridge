@@ -19,7 +19,7 @@ impl TaskFetcher {
     pub async fn run(&self, tx: Sender<ContractCall>) {
         let mut timer = tokio::time::interval(Duration::from_secs(1));
 
-        // TODO: reset subttimg
+        // TODO: reset submitting
 
         loop {
             timer.tick().await;
@@ -33,6 +33,8 @@ impl TaskFetcher {
 
     // TODO: this only support commitBlock. we will also need to support proveBlock
     async fn run_inner(&self, tx: &Sender<ContractCall>) -> Result<(), anyhow::Error> {
+        let mut db_tx = self.connpool.begin().await?;
+
         let query: &'static str = const_format::formatcp!(
             r#"
             select * from {} t
@@ -45,7 +47,7 @@ impl TaskFetcher {
         );
         let task: Option<models::task::Task> = sqlx::query_as(&query)
             .bind(models::l2_block::BlockStatus::Uncommited)
-            .fetch_optional(&self.connpool)
+            .fetch_optional(&mut db_tx)
             .await?;
 
         if task.is_some() {
@@ -57,10 +59,16 @@ impl TaskFetcher {
                 public_inputs,
                 serialized_proof,
             }))?;
+
+            let stmt = format!("update {} set status = $1 where block_id = $2", models::tablenames::L2_BLOCK);
+            sqlx::query(&stmt)
+                .bind(models::l2_block::BlockStatus::Submitting)
+                .bind(task.block_id)
+                .execute(&mut db_tx)
+                .await?;
         }
 
-        // TODO: mark block.status as submitting
-
+        db_tx.commit().await?;
         Ok(())
     }
 }

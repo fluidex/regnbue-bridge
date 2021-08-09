@@ -42,7 +42,7 @@ impl EthSender {
                 continue;
             };
 
-        // TODO: mark block.status as commited
+            // TODO: mark block.status as commited
         }
     }
 
