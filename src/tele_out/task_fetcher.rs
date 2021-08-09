@@ -44,8 +44,6 @@ impl TaskFetcher {
             models::tablenames::TASK,
             models::tablenames::L2_BLOCK,
         );
-
-        let query = format!("select * from {} where status = $1 LIMIT 1", models::tablenames::TASK);
         let task: Option<models::task::Task> = sqlx::query_as(&query)
             .bind(models::l2_block::BlockStatus::Uncommited)
             .fetch_optional(&self.connpool)
