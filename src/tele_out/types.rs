@@ -5,7 +5,7 @@ pub enum ContractCall {
     SubmitBlock(SubmitBlockArgs),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SubmitBlockArgs {
     pub block_id: U256,
     pub public_inputs: Vec<U256>,

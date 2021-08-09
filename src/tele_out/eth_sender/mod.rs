@@ -9,6 +9,7 @@ use ethers::{
     providers::{Http, Provider},
     types::{Address, H256},
 };
+use fluidex_common::db::models;
 use std::convert::TryFrom;
 
 #[derive(Debug)]
@@ -35,14 +36,25 @@ impl EthSender {
     pub async fn run(&self, rx: Receiver<ContractCall>) {
         for call in rx.iter() {
             log::debug!("{:?}", call);
-            if let Err(e) = match call {
-                ContractCall::SubmitBlock(args) => self.submit_block(args).await,
-            } {
-                log::error!("{:?}", e);
-                continue;
-            };
+            match call {
+                ContractCall::SubmitBlock(args) => {
+                    if let Err(e) = self.submit_block(args.clone()).await {
+                        log::error!("{:?}", e);
+                        continue;
+                    }
 
-            // TODO: mark block.status as commited
+                    // mark block.status as commited
+                    let stmt = format!("update {} set status = $1 where block_id = $2", models::tablenames::L2_BLOCK);
+                    if let Err(e) = sqlx::query(&stmt)
+                        .bind(models::l2_block::BlockStatus::Commited)
+                        .bind(args.block_id.as_u64() as i64)
+                        .execute(&self.connpool)
+                        .await
+                    {
+                        log::error!("{:?}", e);
+                    };
+                }
+            }
         }
     }
 
