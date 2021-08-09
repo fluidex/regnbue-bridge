@@ -19,6 +19,8 @@ impl TaskFetcher {
     pub async fn run(&self, tx: Sender<ContractCall>) {
         let mut timer = tokio::time::interval(Duration::from_secs(1));
 
+        // TODO: reset subttimg
+
         loop {
             timer.tick().await;
             log::debug!("ticktock!");
@@ -30,6 +32,23 @@ impl TaskFetcher {
     }
 
     async fn run_inner(&self, tx: &Sender<ContractCall>) -> Result<(), anyhow::Error> {
+        let query: &'static str = const_format::formatcp!(
+            r#"
+            select i.time       as time,
+                   af.l2_pubkey as user_from,
+                   at.l2_pubkey as user_to,
+                   i.asset      as asset,
+                   i.amount     as amount
+            from {} t
+            inner join {} b on t.block_id = b.id
+            where status = $1
+            ORDER_BY
+             D
+            LIMIT 1"#,
+            models::tablenames::TASK,
+            models::tablenames::L2_BLOCK,
+        );
+
         let query = format!("select * from {} where status = $1 LIMIT 1", models::tablenames::TASK);
         let task: Option<models::task::Task> = sqlx::query_as(&query)
             .bind(models::task::TaskStatus::Proved)
