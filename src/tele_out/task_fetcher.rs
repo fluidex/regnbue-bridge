@@ -32,7 +32,6 @@ impl TaskFetcher {
     }
 
     // TODO: this only support commitBlock. we will also need to support proveBlock
-    // TODO: marking as submitting
     async fn run_inner(&self, tx: &Sender<ContractCall>) -> Result<(), anyhow::Error> {
         let query: &'static str = const_format::formatcp!(
             r#"
@@ -59,6 +58,8 @@ impl TaskFetcher {
                 serialized_proof,
             }))?;
         }
+
+        // TODO: mark block.status as submitting
 
         Ok(())
     }

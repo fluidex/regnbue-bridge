@@ -42,7 +42,7 @@ impl EthSender {
                 continue;
             };
 
-            // TODO: save to db
+        // TODO: mark block.status as commited
         }
     }
 
