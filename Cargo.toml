@@ -10,6 +10,7 @@ edition = "2018"
 anyhow = "1.0"
 chrono = { version = "0.4.19", features = [ "serde" ] }
 config_rs = { package = "config", version = "0.10.1" }
+const_format = "0.2.15"
 crossbeam-channel = "0.5.1"
 ctrlc = { version = "3.1", features = [ "termination" ] }
 dotenv = "0.15.0"

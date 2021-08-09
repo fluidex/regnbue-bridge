@@ -1,4 +1,4 @@
-use super::types::{ContractCall, ProofData};
+use super::types::{ContractCall, SubmitBlockArgs};
 use crate::contracts;
 use crate::storage::PoolType;
 use crate::tele_out::Settings;
@@ -9,6 +9,7 @@ use ethers::{
     providers::{Http, Provider},
     types::{Address, H256},
 };
+use fluidex_common::db::models;
 use std::convert::TryFrom;
 
 #[derive(Debug)]
@@ -35,24 +36,35 @@ impl EthSender {
     pub async fn run(&self, rx: Receiver<ContractCall>) {
         for call in rx.iter() {
             log::debug!("{:?}", call);
-            let action = match call {
-                ContractCall::SubmitProof(data) => self.submit_proof(data),
-            };
-            if let Err(e) = action.await {
-                log::error!("{:?}", e);
-            };
+            match call {
+                ContractCall::SubmitBlock(args) => {
+                    if let Err(e) = self.submit_block(args.clone()).await {
+                        log::error!("{:?}", e);
+                        continue;
+                    }
 
-            // TODO: save to db
+                    // mark block.status as commited
+                    let stmt = format!("update {} set status = $1 where block_id = $2", models::tablenames::L2_BLOCK);
+                    if let Err(e) = sqlx::query(&stmt)
+                        .bind(models::l2_block::BlockStatus::Commited)
+                        .bind(args.block_id.as_u64() as i64)
+                        .execute(&self.connpool)
+                        .await
+                    {
+                        log::error!("{:?}", e);
+                    };
+                }
+            }
         }
     }
 
-    pub async fn submit_proof(&self, data: ProofData) -> Result<(), anyhow::Error> {
+    pub async fn submit_block(&self, args: SubmitBlockArgs) -> Result<(), anyhow::Error> {
         let call = self
             .contract
-            .method::<_, H256>("submitBlock", (data.block_id, data.public_inputs, data.serialized_proof))?;
+            .method::<_, H256>("submitBlock", (args.block_id, args.public_inputs, args.serialized_proof))?;
         let pending_tx = call.send().await?;
-        let _receipt = pending_tx.confirmations(self.confirmations).await?;
-        log::info!("block {:?} submitted", data.block_id);
+        let receipt = pending_tx.confirmations(self.confirmations).await?;
+        log::info!("block {:?} submitted. receipt: {:?}.", args.block_id, receipt);
         Ok(())
     }
 }

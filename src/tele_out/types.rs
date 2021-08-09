@@ -2,11 +2,11 @@ use ethers::types::U256;
 
 #[derive(Debug)]
 pub enum ContractCall {
-    SubmitProof(ProofData),
+    SubmitBlock(SubmitBlockArgs),
 }
 
-#[derive(Debug)]
-pub struct ProofData {
+#[derive(Debug, Clone)]
+pub struct SubmitBlockArgs {
     pub block_id: U256,
     pub public_inputs: Vec<U256>,
     pub serialized_proof: Vec<U256>,
