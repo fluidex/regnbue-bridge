@@ -31,19 +31,15 @@ impl TaskFetcher {
         }
     }
 
+    // TODO: this only support commitBlock. we will also need to support proveBlock
+    // TODO: marking as submitting
     async fn run_inner(&self, tx: &Sender<ContractCall>) -> Result<(), anyhow::Error> {
         let query: &'static str = const_format::formatcp!(
             r#"
-            select i.time       as time,
-                   af.l2_pubkey as user_from,
-                   at.l2_pubkey as user_to,
-                   i.asset      as asset,
-                   i.amount     as amount
-            from {} t
-            inner join {} b on t.block_id = b.id
-            where status = $1
-            ORDER_BY
-             D
+            select * from {} t
+            inner join {} b on t.block_id = b.block_id
+            where block.status = $1
+            ORDER_BY t.block_id ASC
             LIMIT 1"#,
             models::tablenames::TASK,
             models::tablenames::L2_BLOCK,
@@ -51,7 +47,7 @@ impl TaskFetcher {
 
         let query = format!("select * from {} where status = $1 LIMIT 1", models::tablenames::TASK);
         let task: Option<models::task::Task> = sqlx::query_as(&query)
-            .bind(models::task::TaskStatus::Proved)
+            .bind(models::l2_block::BlockStatus::Uncommited)
             .fetch_optional(&self.connpool)
             .await?;
 
