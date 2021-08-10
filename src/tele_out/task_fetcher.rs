@@ -49,7 +49,7 @@ impl TaskFetcher {
 
         #[derive(sqlx::FromRow, Debug, Clone)]
         struct Task {
-            block_id: String,
+            block_id: i64,
             public_input: Vec<u8>,
             proof: Vec<u8>,
         }
