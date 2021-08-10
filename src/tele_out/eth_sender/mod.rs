@@ -43,10 +43,9 @@ impl EthSender {
                         continue;
                     }
 
-                    // mark block.status as commited
                     let stmt = format!("update {} set status = $1 where block_id = $2", models::tablenames::L2_BLOCK);
                     if let Err(e) = sqlx::query(&stmt)
-                        .bind(models::l2_block::BlockStatus::Commited)
+                        .bind(models::l2_block::BlockStatus::Verified)
                         .bind(args.block_id.as_u64() as i64)
                         .execute(&self.connpool)
                         .await

@@ -44,7 +44,7 @@ impl TaskFetcher {
         Ok(())
     }
 
-    // TODO: this only support commitBlock. we will also need to support proveBlock
+    // TODO: this only support proveBlock. we will also need to support commitBlock
     async fn run_inner(&self, tx: &Sender<ContractCall>) -> Result<(), anyhow::Error> {
         let mut db_tx = self.connpool.begin().await?;
 
@@ -65,7 +65,7 @@ impl TaskFetcher {
                 t.updated_time as updated_time
             from {} t
                 inner join {} b on t.block_id = b.block_id
-            where b.status = $1
+            where b.status = $1 and t.status = $2
             ORDER BY t.block_id ASC
             LIMIT 1"#,
             models::tablenames::TASK,
@@ -73,15 +73,17 @@ impl TaskFetcher {
         );
         let task: Option<models::task::Task> = sqlx::query_as(&query)
             .bind(models::l2_block::BlockStatus::Uncommited)
+            .bind(models::task::TaskStatus::Proved)
             .fetch_optional(&mut db_tx)
             .await?;
 
         if task.is_some() {
             let task = task.unwrap();
             let public_inputs: Vec<U256> = serde_json::de::from_slice(&task.public_input.unwrap())?;
-            // TODO: no proof? has proof?
-            // let serialized_proof: Vec<U256> = serde_json::de::from_slice(&task.proof.unwrap())?;
-            let serialized_proof: Vec<U256> = vec![];
+            let serialized_proof: Vec<U256> = serde_json::de::from_slice(&task.proof.unwrap())?;
+            // TODO: no proof?  but we will need a "decode inputs to public_inputs",
+            // because now we don't have public_inputs until proved
+            // let serialized_proof: Vec<U256> = vec![];
             tx.try_send(ContractCall::SubmitBlock(SubmitBlockArgs {
                 block_id: task.block_id.into(),
                 public_inputs,
