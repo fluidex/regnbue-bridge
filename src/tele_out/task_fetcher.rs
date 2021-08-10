@@ -50,8 +50,21 @@ impl TaskFetcher {
 
         let query: &'static str = const_format::formatcp!(
             r#"
-            select * from {} t
-            inner join {} b on t.block_id = b.block_id
+            select
+                t.task_id as task_id, 
+                t.circuit as circuit, 
+                t.block_id as block_id, 
+                t.input as input, 
+                t.output as output, 
+                t.witness as witness, 
+                t.public_input as public_input, 
+                t.proof as proof, 
+                t.status as status, 
+                t.prover_id as prover_id, 
+                t.created_time as created_time, 
+                t.updated_time as updated_time
+            from {} t
+                inner join {} b on t.block_id = b.block_id
             where b.status = $1
             ORDER BY t.block_id ASC
             LIMIT 1"#,
