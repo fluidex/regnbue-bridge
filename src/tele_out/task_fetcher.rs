@@ -47,39 +47,34 @@ impl TaskFetcher {
     async fn run_inner(&self, tx: &Sender<ContractCall>) -> Result<(), anyhow::Error> {
         let mut db_tx = self.connpool.begin().await?;
 
+        #[derive(sqlx::FromRow, Debug, Clone)]
+        struct Task {
+            block_id: String,
+            public_input: Vec<u8>,
+            proof: Vec<u8>,
+        }
+
         let query: &'static str = const_format::formatcp!(
             r#"
             select
-                t.task_id as task_id, 
-                t.circuit as circuit, 
-                t.block_id as block_id, 
-                t.input as input, 
-                t.output as output, 
-                t.witness as witness, 
-                t.public_input as public_input, 
-                t.proof as proof, 
-                t.status as status, 
-                t.prover_id as prover_id, 
-                t.created_time as created_time, 
-                t.updated_time as updated_time
+                t.block_id as block_id,
+                t.public_input as public_input,
+                t.proof as proof
             from {} t
-                inner join {} b on t.block_id = b.block_id
-            where b.status = $1 and t.status = $2
-            ORDER BY t.block_id ASC
-            LIMIT 1"#,
+            inner join {} l2b on t.block_id = l2b.block_id
+            where t.status = 'proved' and l2b.status = 'uncommited'
+            order by l2b.block_id
+            limit 1"#,
             models::tablenames::TASK,
             models::tablenames::L2_BLOCK,
         );
-        let task: Option<models::task::Task> = sqlx::query_as(&query)
-            .bind(models::l2_block::BlockStatus::Uncommited)
-            .bind(models::task::TaskStatus::Proved)
+        let task: Option<Task> = sqlx::query_as(&query)
             .fetch_optional(&mut db_tx)
             .await?;
 
-        if task.is_some() {
-            let task = task.unwrap();
-            let public_inputs: Vec<U256> = serde_json::de::from_slice(&task.public_input.unwrap())?;
-            let serialized_proof: Vec<U256> = serde_json::de::from_slice(&task.proof.unwrap())?;
+        if let Some(task) = task {
+            let public_inputs: Vec<U256> = serde_json::de::from_slice(&task.public_input)?;
+            let serialized_proof: Vec<U256> = serde_json::de::from_slice(&task.proof)?;
             tx.try_send(ContractCall::SubmitBlock(SubmitBlockArgs {
                 block_id: task.block_id.into(),
                 public_inputs,
