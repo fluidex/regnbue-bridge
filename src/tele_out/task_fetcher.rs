@@ -44,7 +44,6 @@ impl TaskFetcher {
         Ok(())
     }
 
-    // TODO: this only support proveBlock. we will also need to support commitBlock
     async fn run_inner(&self, tx: &Sender<ContractCall>) -> Result<(), anyhow::Error> {
         let mut db_tx = self.connpool.begin().await?;
 
@@ -81,9 +80,6 @@ impl TaskFetcher {
             let task = task.unwrap();
             let public_inputs: Vec<U256> = serde_json::de::from_slice(&task.public_input.unwrap())?;
             let serialized_proof: Vec<U256> = serde_json::de::from_slice(&task.proof.unwrap())?;
-            // TODO: no proof?  but we will need a "decode inputs to public_inputs",
-            // because now we don't have public_inputs until proved
-            // let serialized_proof: Vec<U256> = vec![];
             tx.try_send(ContractCall::SubmitBlock(SubmitBlockArgs {
                 block_id: task.block_id.into(),
                 public_inputs,
