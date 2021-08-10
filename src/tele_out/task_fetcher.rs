@@ -62,9 +62,9 @@ impl TaskFetcher {
                 t.status as status, 
                 t.prover_id as prover_id, 
                 t.created_time as created_time, 
-                t.updated_time as t.updated_time
+                t.updated_time as updated_time
             from {} t
-            inner join {} b on t.block_id = b.block_id
+                inner join {} b on t.block_id = b.block_id
             where b.status = $1
             ORDER BY t.block_id ASC
             LIMIT 1"#,
