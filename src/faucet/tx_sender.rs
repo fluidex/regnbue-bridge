@@ -48,12 +48,12 @@ impl TxSender {
             .await
             .map_err(|e| anyhow!("grpc_client send faucet tx: {:?}", e))?;
 
-        if task.to_user > 1 {
-            self.grpc_client
-                .mock_transfer(&task)
-                .await
-                .map_err(|e| anyhow!("grpc_client send transfer tx: {:?}", e))?;
-        }
+        // if task.to_user > 1 {
+        //     self.grpc_client
+        //         .mock_transfer(&task)
+        //         .await
+        //         .map_err(|e| anyhow!("grpc_client send transfer tx: {:?}", e))?;
+        // }
 
         self.mark_fund_sent(task.clone().id)
             .await
