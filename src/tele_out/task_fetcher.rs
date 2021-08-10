@@ -52,8 +52,8 @@ impl TaskFetcher {
             r#"
             select * from {} t
             inner join {} b on t.block_id = b.block_id
-            where block.status = $1
-            ORDER_BY t.block_id ASC
+            where b.status = $1
+            ORDER BY t.block_id ASC
             LIMIT 1"#,
             models::tablenames::TASK,
             models::tablenames::L2_BLOCK,
