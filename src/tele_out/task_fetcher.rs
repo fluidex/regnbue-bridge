@@ -40,14 +40,20 @@ impl TaskFetcher {
 
         let query: &'static str = const_format::formatcp!(
             r#"
-            select
-                t.block_id as block_id,
-                t.public_input as public_input,
-                t.proof as proof
-            from {} t
-            inner join {} l2b on t.block_id = l2b.block_id
-            where t.status = 'proved' and l2b.status = 'uncommited'
-            order by l2b.block_id
+            select t.block_id     as block_id,
+                   t.public_input as public_input,
+                   t.proof        as proof
+            from task t
+                     inner join l2block l2b
+                                on t.block_id = l2b.block_id
+            where t.block_id < coalesce((select block_id
+                                         from task
+                                         where status <> 'proved'
+                                         order by block_id
+                                         limit 1), 0)
+              and t.status = 'proved' -- defense filter
+              and l2b.status = 'uncommited'
+            order by t.block_id
             limit 1"#,
             models::tablenames::TASK,
             models::tablenames::L2_BLOCK,
