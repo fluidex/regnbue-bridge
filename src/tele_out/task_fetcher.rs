@@ -43,8 +43,8 @@ impl TaskFetcher {
             select t.block_id     as block_id,
                    t.public_input as public_input,
                    t.proof        as proof
-            from task t
-                     inner join l2block l2b
+            from {} t
+                     inner join {} l2b
                                 on t.block_id = l2b.block_id
             where t.block_id < coalesce((select block_id
                                          from task
