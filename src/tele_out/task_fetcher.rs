@@ -18,12 +18,6 @@ impl TaskFetcher {
 
     pub async fn run(&self, tx: Sender<ContractCall>) {
         let mut timer = tokio::time::interval(Duration::from_secs(1));
-
-        if let Err(e) = self.reset_submitting().await {
-            // TODO: should exit?
-            log::error!("{}", e);
-        };
-
         loop {
             timer.tick().await;
             log::debug!("ticktock!");
@@ -32,16 +26,6 @@ impl TaskFetcher {
                 log::error!("{}", e);
             };
         }
-    }
-
-    async fn reset_submitting(&self) -> Result<(), anyhow::Error> {
-        let stmt = format!("update {} set status = $1 where status = $2", models::tablenames::L2_BLOCK);
-        sqlx::query(&stmt)
-            .bind(models::l2_block::BlockStatus::Submitting)
-            .bind(models::l2_block::BlockStatus::Uncommited)
-            .execute(&self.connpool)
-            .await?;
-        Ok(())
     }
 
     async fn run_inner(&self, tx: &Sender<ContractCall>) -> Result<(), anyhow::Error> {
