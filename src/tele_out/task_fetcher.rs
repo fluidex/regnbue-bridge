@@ -58,9 +58,7 @@ impl TaskFetcher {
             models::tablenames::TASK,
             models::tablenames::L2_BLOCK,
         );
-        let task: Option<Task> = sqlx::query_as(&query)
-            .fetch_optional(&mut db_tx)
-            .await?;
+        let task: Option<Task> = sqlx::query_as(&query).fetch_optional(&mut db_tx).await?;
 
         if let Some(task) = task {
             let public_inputs: Vec<U256> = serde_json::de::from_slice(&task.public_input)?;
