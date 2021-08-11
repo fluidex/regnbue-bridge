@@ -67,7 +67,7 @@ impl TaskFetcher {
 
             let stmt = format!("update {} set status = $1 where block_id = $2", models::tablenames::L2_BLOCK);
             sqlx::query(&stmt)
-                .bind(models::l2_block::BlockStatus::Submitting)
+                .bind(models::l2_block::BlockStatus::Commited)
                 .bind(task.block_id)
                 .execute(&mut db_tx)
                 .await?;
