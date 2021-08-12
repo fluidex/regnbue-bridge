@@ -1332,6 +1332,7 @@ dependencies = [
  "fluidex-common",
  "futures",
  "log",
+ "orchestra",
  "prost",
  "prost-types",
  "rdkafka",
@@ -1994,6 +1995,17 @@ dependencies = [
  "libc",
  "pkg-config",
  "vcpkg",
+]
+
+[[package]]
+name = "orchestra"
+version = "0.1.0"
+source = "git+https://github.com/fluidex/orchestra.git?branch=master#b3b45ccb205c5769d1b4ec7bf05c1c4127ebd84d"
+dependencies = [
+ "prost",
+ "serde 1.0.126",
+ "tonic",
+ "tonic-build",
 ]
 
 [[package]]
