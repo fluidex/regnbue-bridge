@@ -9,7 +9,7 @@ use std::time::Duration;
 #[derive(Debug)]
 pub struct TaskFetcher {
     connpool: PoolType,
-    last_block_id: Option<u64>,
+    last_block_id: Option<i64>,
 }
 
 impl TaskFetcher {
@@ -37,7 +37,7 @@ impl TaskFetcher {
 
         #[derive(sqlx::FromRow, Debug, Clone)]
         struct Task {
-            block_id: u64,
+            block_id: i64,
             public_input: Vec<u8>,
             proof: Vec<u8>,
         }
@@ -65,7 +65,7 @@ impl TaskFetcher {
         );
 
         let task: Option<Task> = sqlx::query_as(&query)
-            .bind(self.last_block_id.map(|id| id as i64).unwrap_or(-1))
+            .bind(self.last_block_id.unwrap_or(-1))
             .fetch_optional(&mut db_tx)
             .await?;
 
