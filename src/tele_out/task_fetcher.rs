@@ -16,7 +16,7 @@ impl TaskFetcher {
     pub fn from_config_with_pool(_config: &Settings, connpool: PoolType) -> Self {
         Self {
             connpool,
-            last_block_id: None
+            last_block_id: None,
         }
     }
 
@@ -66,7 +66,8 @@ impl TaskFetcher {
 
         let task: Option<Task> = sqlx::query_as(&query)
             .bind(self.last_block_id.map(|id| id as i64).unwrap_or(-1))
-            .fetch_optional(&mut db_tx).await?;
+            .fetch_optional(&mut db_tx)
+            .await?;
 
         if let Some(task) = task {
             let public_inputs: Vec<U256> = serde_json::de::from_slice(&task.public_input)?;
