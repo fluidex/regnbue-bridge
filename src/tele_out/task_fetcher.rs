@@ -9,14 +9,18 @@ use std::time::Duration;
 #[derive(Debug)]
 pub struct TaskFetcher {
     connpool: PoolType,
+    last_block_id: Option<u64>,
 }
 
 impl TaskFetcher {
     pub fn from_config_with_pool(_config: &Settings, connpool: PoolType) -> Self {
-        Self { connpool }
+        Self {
+            connpool,
+            last_block_id: None
+        }
     }
 
-    pub async fn run(&self, tx: Sender<ContractCall>) {
+    pub async fn run(&mut self, tx: Sender<ContractCall>) {
         let mut timer = tokio::time::interval(Duration::from_secs(1));
         loop {
             timer.tick().await;
@@ -28,12 +32,12 @@ impl TaskFetcher {
         }
     }
 
-    async fn run_inner(&self, tx: &Sender<ContractCall>) -> Result<(), anyhow::Error> {
+    async fn run_inner(&mut self, tx: &Sender<ContractCall>) -> Result<(), anyhow::Error> {
         let mut db_tx = self.connpool.begin().await?;
 
         #[derive(sqlx::FromRow, Debug, Clone)]
         struct Task {
-            block_id: i64,
+            block_id: u64,
             public_input: Vec<u8>,
             proof: Vec<u8>,
         }
@@ -51,6 +55,7 @@ impl TaskFetcher {
                                          where status <> 'proved'
                                          order by block_id
                                          limit 1), 0)
+              and t.block_id > $1
               and t.status = 'proved' -- defense filter
               and l2b.status = 'uncommited'
             order by t.block_id
@@ -58,7 +63,10 @@ impl TaskFetcher {
             models::tablenames::TASK,
             models::tablenames::L2_BLOCK,
         );
-        let task: Option<Task> = sqlx::query_as(&query).fetch_optional(&mut db_tx).await?;
+
+        let task: Option<Task> = sqlx::query_as(&query)
+            .bind(self.last_block_id.map(|id| id as i64).unwrap_or(-1))
+            .fetch_optional(&mut db_tx).await?;
 
         if let Some(task) = task {
             let public_inputs: Vec<U256> = serde_json::de::from_slice(&task.public_input)?;
@@ -68,13 +76,7 @@ impl TaskFetcher {
                 public_inputs,
                 serialized_proof,
             }))?;
-
-            let stmt = format!("update {} set status = $1 where block_id = $2", models::tablenames::L2_BLOCK);
-            sqlx::query(&stmt)
-                .bind(models::l2_block::BlockStatus::Commited)
-                .bind(task.block_id)
-                .execute(&mut db_tx)
-                .await?;
+            self.last_block_id = Some(task.block_id);
         }
 
         db_tx.commit().await?;
