@@ -1,5 +1,6 @@
 use crate::mq::messages::WrappedMessage;
-use crate::mq::msg_consumer::{Simple, SimpleConsumer, SimpleMessageHandler};
+use fluidex_common::message::consumer::{Simple, SimpleConsumer, SimpleMessageHandler};
+use fluidex_common::rdkafka;
 use rdkafka::consumer::StreamConsumer;
 use rdkafka::message::{BorrowedMessage, Message};
 
