@@ -62,8 +62,9 @@ impl EthSender {
             .contract
             .method::<_, H256>("submitBlock", (args.block_id, args.public_inputs, args.serialized_proof))?;
         let pending_tx = call.send().await?;
-        let receipt = pending_tx.confirmations(self.confirmations).await?;
-        log::info!("block {:?} submitted. receipt: {:?}.", args.block_id, receipt);
+        // let receipt = pending_tx.confirmations(self.confirmations).await?;
+        // log::info!("block {:?} submitted. receipt: {:?}.", args.block_id, receipt);
+        log::info!("block {:?} submitted.", args.block_id);
         Ok(())
     }
 }
