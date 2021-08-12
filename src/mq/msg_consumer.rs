@@ -1,4 +1,4 @@
-// copied from https://github.com/Fluidex/dingir-exchange/blob/master/src/message/consumer.rs
+// copied from https://github.com/fluidex/dingir-exchange/blob/master/src/message/consumer.rs
 
 #![allow(dead_code)]
 
