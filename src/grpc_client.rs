@@ -1,7 +1,6 @@
 use crate::faucet::storage::models;
-use crate::pb::matchengine_client::MatchengineClient;
-use crate::pb::*;
 use anyhow::anyhow;
+use orchestra::rpc::exchange::*;
 
 #[derive(Debug, Clone)]
 pub struct GrpcClient {
@@ -10,7 +9,7 @@ pub struct GrpcClient {
 
 impl GrpcClient {
     pub async fn fund(&self, tx: &models::FaucetTx) -> Result<BalanceUpdateResponse, anyhow::Error> {
-        let mut client = MatchengineClient::connect(self.upstream.clone()).await?;
+        let mut client = matchengine_client::MatchengineClient::connect(self.upstream.clone()).await?;
 
         let request = tonic::Request::new(BalanceUpdateRequest {
             user_id: tx.to_user as u32,
@@ -30,7 +29,7 @@ impl GrpcClient {
     pub async fn mock_transfer(&self, tx: &models::FaucetTx) -> Result<TransferResponse, anyhow::Error> {
         assert!(tx.to_user > 1);
 
-        let mut client = MatchengineClient::connect(self.upstream.clone()).await?;
+        let mut client = matchengine_client::MatchengineClient::connect(self.upstream.clone()).await?;
 
         let request = tonic::Request::new(TransferRequest {
             from: tx.to_user as u32,
