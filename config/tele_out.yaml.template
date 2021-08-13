@@ -1,4 +1,4 @@
-db: postgres://postgres:postgres_AA9944@127.0.0.1:5434/rollup_state_manager
+db: ${DB}
 contract_address: '${CONTRACT_ADDR}'
 contract_abi_file_path: '${CONTRACTS_DIR}/artifacts/contracts/Fluidex.sol/FluidexDemo.json'
 web3_url: http://localhost:8545
