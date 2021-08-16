@@ -1,13 +1,13 @@
 use fluidex_common::non_blocking_tracing;
 use futures::{channel::mpsc, executor::block_on, SinkExt, StreamExt};
-use heimdallr::faucet::{storage, Settings, TxProposer, TxSender};
+use regnbue_bridge::faucet::{storage, Settings, TxProposer, TxSender};
 use std::cell::RefCell;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
     let _guard = non_blocking_tracing::setup();
-    log::info!("heimdallr faucet started");
+    log::info!("regnbue-bridge faucet started");
 
     let mut conf = config_rs::Config::new();
     let config_file = dotenv::var("FAUCET_CONFIG").unwrap();
