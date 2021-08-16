@@ -14,7 +14,7 @@ impl GrpcClient {
         let request = tonic::Request::new(BalanceUpdateRequest {
             user_id: tx.to_user as u32,
             asset: tx.asset.clone(),
-            business: "heimdallr_faucet".to_string(),
+            business: "regnbue_bridge_faucet".to_string(),
             business_id: tx.id as u64,
             delta: tx.amount.to_string(),
             detail: serde_json::json!({"id": "", "faucet_tx time": tx.created_time}).to_string(),

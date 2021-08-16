@@ -1,5 +1,5 @@
 brokers: '127.0.0.1:9092'
-db: postgres://heimdallr:heimdallr_AA9944@127.0.0.1:5436/heimdallr
+db: postgres://regnbue_bridge:regnbue_bridge_AA9944@127.0.0.1:5436/regnbue_bridge
 grpc_upstream: "http://0.0.0.0:50051"
 send_interval: 3000
 fundings:

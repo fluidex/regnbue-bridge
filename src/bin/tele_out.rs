@@ -1,13 +1,13 @@
 use fluidex_common::non_blocking_tracing;
 use futures::{channel::mpsc, executor::block_on, SinkExt, StreamExt};
-use heimdallr::tele_out::{storage, EthSender, Settings, TaskFetcher};
+use regnbue_bridge::tele_out::{storage, EthSender, Settings, TaskFetcher};
 use std::cell::RefCell;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
     let _guard = non_blocking_tracing::setup();
-    log::info!("heimdallr tele_out started");
+    log::info!("regnbue-bridge tele_out started");
 
     let mut conf = config_rs::Config::new();
     let config_file = dotenv::var("TELE_OUT_CONFIG").unwrap();
