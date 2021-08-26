@@ -3,6 +3,6 @@ db: postgres://regnbue_bridge:regnbue_bridge_AA9944@127.0.0.1:5436/regnbue_bridg
 grpc_upstream: "http://0.0.0.0:50051"
 send_interval: 3000
 fundings:
-  ETH: 100
+  ETH: 1
   USDT: 10000
-  UNI: 1000
+  UNI: 100
