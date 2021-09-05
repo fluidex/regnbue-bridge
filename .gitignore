@@ -16,4 +16,4 @@
 
 *.log
 
-config/tele_out.yaml
+config/block_submitter.yaml

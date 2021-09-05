@@ -1,6 +1,6 @@
 use super::types::{ContractCall, SubmitBlockArgs};
+use crate::block_submitter::Settings;
 use crate::storage::PoolType;
-use crate::tele_out::Settings;
 use crossbeam_channel::Sender;
 use ethers::types::U256;
 use fluidex_common::db::models;
