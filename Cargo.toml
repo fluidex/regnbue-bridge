@@ -33,9 +33,13 @@ prost = "0.7.0"
 tonic-build = "0.4.0"
 
 [[bin]]
+name = "block_submitter"
+path = "src/bin/block_submitter.rs"
+
+[[bin]]
 name = "faucet"
 path = "src/bin/faucet.rs"
 
 [[bin]]
-name = "block_submitter"
-path = "src/bin/block_submitter.rs"
+name = "tele_out"
+path = "src/bin/tele_out.rs"
