@@ -1,7 +1,7 @@
 use super::types::{ContractCall, SubmitBlockArgs};
+use crate::block_submitter::Settings;
 use crate::contracts;
 use crate::storage::PoolType;
-use crate::tele_out::Settings;
 use crossbeam_channel::Receiver;
 use ethers::{
     abi::Abi,

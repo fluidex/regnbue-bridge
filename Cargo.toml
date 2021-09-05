@@ -37,5 +37,5 @@ name = "faucet"
 path = "src/bin/faucet.rs"
 
 [[bin]]
-name = "tele_out"
-path = "src/bin/tele_out.rs"
+name = "block_submitter"
+path = "src/bin/block_submitter.rs"

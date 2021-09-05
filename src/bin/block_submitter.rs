@@ -1,16 +1,16 @@
 use fluidex_common::non_blocking_tracing;
 use futures::{channel::mpsc, executor::block_on, SinkExt, StreamExt};
-use regnbue_bridge::tele_out::{storage, EthSender, Settings, TaskFetcher};
+use regnbue_bridge::block_submitter::{storage, EthSender, Settings, TaskFetcher};
 use std::cell::RefCell;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
     let _guard = non_blocking_tracing::setup();
-    log::info!("regnbue-bridge tele_out started");
+    log::info!("regnbue-bridge Block Submitter started");
 
     let mut conf = config_rs::Config::new();
-    let config_file = dotenv::var("TELE_OUT_CONFIG").unwrap();
+    let config_file = dotenv::var("BLOCK_SUBMITTER_CONFIG").unwrap();
     conf.merge(config_rs::File::with_name(&config_file)).unwrap();
     let settings: Settings = conf.try_into().unwrap();
     log::debug!("{:?}", settings);
@@ -36,7 +36,7 @@ async fn main() -> anyhow::Result<()> {
 
     tokio::select! {
         _ = async { fetcher_task_handle.await } => {
-            panic!("Tele_out task fetcher actor is not supposed to finish its execution")
+            panic!("Block Submitter task fetcher actor is not supposed to finish its execution")
         },
         _ = async { eth_sender_task_handle.await } => {
             panic!("Ethereum Sender actor is not supposed to finish its execution")
