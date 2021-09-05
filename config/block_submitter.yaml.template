@@ -1,5 +1,5 @@
 db: ${DB}
 contract_address: '${CONTRACT_ADDR}'
-contract_abi_file_path: '${CONTRACTS_DIR}/artifacts/contracts/Fluidex.sol/FluidexDemo.json'
+contract_abi_file_path: '${CONTRACTS_DIR}/artifacts/contracts/FluiDex.sol/FluiDexDemo.json'
 web3_url: http://localhost:8545
 confirmations: 3
