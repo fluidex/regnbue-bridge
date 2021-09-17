@@ -7,6 +7,7 @@ use ethers::abi::Abi;
 use ethers::prelude::*;
 use fluidex_common::db::models;
 use std::convert::TryFrom;
+use std::time::Duration;
 
 #[derive(Debug)]
 pub struct EthSender {
@@ -67,7 +68,10 @@ impl EthSender {
             .unwrap()
             .from(self.account);
         let pending_tx = call.send().await?;
-        let receipt = pending_tx.confirmations(self.confirmations).await?;
+        let receipt = pending_tx
+            .confirmations(self.confirmations)
+            .interval(Duration::from_secs(15))
+            .await?;
         log::info!("block {:?} submitted. receipt: {:?}.", args.block_id, receipt);
         Ok(())
     }
