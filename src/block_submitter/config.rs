@@ -7,4 +7,7 @@ pub struct Settings {
     pub contract_abi_file_path: String,
     pub web3_url: String,     // TODO: default
     pub confirmations: usize, // TODO: default
+    #[serde(default)]
+    /// default using web3 first account
+    pub account: Option<String>,
 }
