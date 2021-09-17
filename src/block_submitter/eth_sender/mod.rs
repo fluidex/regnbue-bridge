@@ -3,31 +3,34 @@ use crate::block_submitter::Settings;
 use crate::contracts;
 use crate::storage::PoolType;
 use crossbeam_channel::Receiver;
-use ethers::{
-    abi::Abi,
-    contract::Contract,
-    providers::{Http, Provider},
-    types::{Address, H256},
-};
+use ethers::abi::Abi;
+use ethers::prelude::*;
 use fluidex_common::db::models;
 use std::convert::TryFrom;
 
 #[derive(Debug)]
 pub struct EthSender {
     connpool: PoolType,
+    account: Address,
     contract: Contract<Provider<Http>>,
     confirmations: usize,
 }
 
 impl EthSender {
-    pub fn from_config_with_pool(config: &Settings, connpool: PoolType) -> Result<Self, anyhow::Error> {
+    pub async fn from_config_with_pool(config: &Settings, connpool: PoolType) -> Result<Self, anyhow::Error> {
         let address = config.contract_address.parse::<Address>()?;
         let abi: Abi = contracts::get_abi(&config.contract_abi_file_path)?;
         let client = Provider::<Http>::try_from(config.web3_url.as_str())?; // assume wallet inside
+        let account = match config.account {
+            None => client.get_accounts().await?[0],
+            Some(ref addr) => addr.parse::<Address>()?,
+        };
+
         let contract = Contract::new(address, abi, client);
 
         Ok(Self {
             connpool,
+            account,
             contract,
             confirmations: config.confirmations,
         })
@@ -60,11 +63,12 @@ impl EthSender {
     pub async fn submit_block(&self, args: SubmitBlockArgs) -> Result<(), anyhow::Error> {
         let call = self
             .contract
-            .method::<_, H256>("submitBlock", (args.block_id, args.public_inputs, args.serialized_proof))?;
-        let _pending_tx = call.send().await?;
-        // let receipt = pending_tx.confirmations(self.confirmations).await?;
-        // log::info!("block {:?} submitted. receipt: {:?}.", args.block_id, receipt);
-        log::info!("block {:?} submitted.", args.block_id);
+            .method::<_, H256>("submitBlock", (args.block_id, args.public_inputs, args.serialized_proof))
+            .unwrap()
+            .from(self.account);
+        let pending_tx = call.send().await?;
+        let receipt = pending_tx.confirmations(self.confirmations).await?;
+        log::info!("block {:?} submitted. receipt: {:?}.", args.block_id, receipt);
         Ok(())
     }
 }
