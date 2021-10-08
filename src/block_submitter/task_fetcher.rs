@@ -64,7 +64,7 @@ impl TaskFetcher {
             models::tablenames::L2_BLOCK,
         );
 
-        let task: Option<Task> = sqlx::query_as(&query)
+        let task: Option<Task> = sqlx::query_as(query)
             .bind(self.last_block_id.unwrap_or(-1))
             .fetch_optional(&mut db_tx)
             .await?;

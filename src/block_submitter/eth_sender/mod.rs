@@ -66,13 +66,12 @@ impl EthSender {
             .method::<_, H256>("submitBlock", (args.block_id, args.public_inputs, args.serialized_proof))
             .unwrap()
             .from(self.account);
-        let _pending_tx = call.send().await?;
-        // let receipt = pending_tx
-        //     .confirmations(confirmations)
-        //     .await
-        //     .unwrap();
-        // log::info!("block {:?} confirmed. receipt: {:?}.", args.block_id, receipt);
-        log::info!("block {:?} submitted.", args.block_id);
+        // ganache does not support EIP-1559
+        #[cfg(feature = "ganache")]
+        let call = call.legacy();
+        let pending_tx = call.send().await?;
+        let receipt = pending_tx.confirmations(self.confirmations).await.unwrap();
+        log::info!("block {:?} confirmed. receipt: {:?}.", args.block_id, receipt);
         Ok(())
     }
 }
