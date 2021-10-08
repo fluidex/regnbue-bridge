@@ -32,6 +32,10 @@ tonic = "0.4.0"
 prost = "0.7.0"
 tonic-build = "0.4.0"
 
+[features]
+default = ["ganache"]
+ganache = []
+
 [[bin]]
 name = "block_submitter"
 path = "src/bin/block_submitter.rs"
