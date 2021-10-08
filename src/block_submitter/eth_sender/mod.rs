@@ -70,10 +70,7 @@ impl EthSender {
         #[cfg(feature = "ganache")]
         let call = call.legacy();
         let pending_tx = call.send().await?;
-        let receipt = pending_tx
-            .confirmations(self.confirmations)
-            .await
-            .unwrap();
+        let receipt = pending_tx.confirmations(self.confirmations).await.unwrap();
         log::info!("block {:?} confirmed. receipt: {:?}.", args.block_id, receipt);
         Ok(())
     }
