@@ -5,6 +5,7 @@ use crate::storage::PoolType;
 use crossbeam_channel::Receiver;
 use ethers::abi::Abi;
 use ethers::prelude::*;
+use ethers::types::H256;
 use fluidex_common::db::models;
 use std::convert::TryFrom;
 
@@ -48,7 +49,11 @@ impl EthSender {
     async fn run_inner(&self, call: ContractCall) -> Result<(), anyhow::Error> {
         match call {
             ContractCall::SubmitBlock(args) => {
-                let tx_hash = self.submit_block(args.clone()).await?.unwrap();
+                let tx_hash = match self.submit_block(args.clone()).await? {
+                    // https://stackoverflow.com/questions/57350082/to-convert-a-ethereum-typesh256-to-string-in-rust
+                    Some(h) => format!("{:#x}", h),
+                    None => "".to_string(),
+                };
 
                 let stmt = format!(
                     "update {} set status = $1, l1_tx_hash = $2 where block_id = $3",
@@ -66,7 +71,7 @@ impl EthSender {
         Ok(())
     }
 
-    pub async fn submit_block(&self, args: SubmitBlockArgs) -> Result<Option<String>, anyhow::Error> {
+    pub async fn submit_block(&self, args: SubmitBlockArgs) -> Result<Option<H256>, anyhow::Error> {
         let call = self
             .contract
             .method::<_, H256>("submitBlock", (args.block_id, args.public_inputs, args.serialized_proof))
@@ -78,6 +83,6 @@ impl EthSender {
         let pending_tx = call.send().await?;
         let receipt = pending_tx.confirmations(self.confirmations).await?;
         log::info!("block {:?} confirmed. receipt: {:?}.", args.block_id, receipt);
-        Ok(receipt.map(|r| r.transaction_hash.to_string()))
+        Ok(receipt.map(|r| r.transaction_hash))
     }
 }
