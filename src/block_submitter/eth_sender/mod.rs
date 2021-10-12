@@ -41,14 +41,21 @@ impl EthSender {
             log::debug!("{:?}", call);
             match call {
                 ContractCall::SubmitBlock(args) => {
-                    if let Err(e) = self.submit_block(args.clone()).await {
-                        log::error!("{:?}", e);
-                        continue;
-                    }
+                    let tx_hash = match self.submit_block(args.clone()).await {
+                        Ok(tx_hash) => tx_hash,
+                        Err(e) => {
+                            log::error!("{:?}", e);
+                            continue;
+                        }
+                    };
 
-                    let stmt = format!("update {} set status = $1 where block_id = $2", models::tablenames::L2_BLOCK);
+                    let stmt = format!(
+                        "update {} set status = $1, l1_tx_hash = $2 where block_id = $3",
+                        models::tablenames::L2_BLOCK
+                    );
                     if let Err(e) = sqlx::query(&stmt)
                         .bind(models::l2_block::BlockStatus::Verified)
+                        .bind(tx_hash)
                         .bind(args.block_id.as_u64() as i64)
                         .execute(&self.connpool)
                         .await
@@ -60,7 +67,7 @@ impl EthSender {
         }
     }
 
-    pub async fn submit_block(&self, args: SubmitBlockArgs) -> Result<(), anyhow::Error> {
+    pub async fn submit_block(&self, args: SubmitBlockArgs) -> Result<Option<String>, anyhow::Error> {
         let call = self
             .contract
             .method::<_, H256>("submitBlock", (args.block_id, args.public_inputs, args.serialized_proof))
@@ -72,6 +79,6 @@ impl EthSender {
         let pending_tx = call.send().await?;
         let receipt = pending_tx.confirmations(self.confirmations).await.unwrap();
         log::info!("block {:?} confirmed. receipt: {:?}.", args.block_id, receipt);
-        Ok(())
+        Ok(receipt.map(|r| r.transaction_hash.to_string()))
     }
 }
