@@ -5,6 +5,7 @@ use crate::storage::PoolType;
 use crossbeam_channel::Receiver;
 use ethers::abi::Abi;
 use ethers::prelude::*;
+use ethers::types::H256;
 use fluidex_common::db::models;
 use std::convert::TryFrom;
 
@@ -39,28 +40,38 @@ impl EthSender {
     pub async fn run(&self, rx: Receiver<ContractCall>) {
         for call in rx.iter() {
             log::debug!("{:?}", call);
-            match call {
-                ContractCall::SubmitBlock(args) => {
-                    if let Err(e) = self.submit_block(args.clone()).await {
-                        log::error!("{:?}", e);
-                        continue;
-                    }
-
-                    let stmt = format!("update {} set status = $1 where block_id = $2", models::tablenames::L2_BLOCK);
-                    if let Err(e) = sqlx::query(&stmt)
-                        .bind(models::l2_block::BlockStatus::Verified)
-                        .bind(args.block_id.as_u64() as i64)
-                        .execute(&self.connpool)
-                        .await
-                    {
-                        log::error!("{:?}", e);
-                    };
-                }
-            }
+            if let Err(e) = self.run_inner(call).await {
+                log::error!("{:?}", e);
+            };
         }
     }
 
-    pub async fn submit_block(&self, args: SubmitBlockArgs) -> Result<(), anyhow::Error> {
+    async fn run_inner(&self, call: ContractCall) -> Result<(), anyhow::Error> {
+        match call {
+            ContractCall::SubmitBlock(args) => {
+                let tx_hash = match self.submit_block(args.clone()).await? {
+                    // https://stackoverflow.com/questions/57350082/to-convert-a-ethereum-typesh256-to-string-in-rust
+                    Some(h) => format!("{:#x}", h),
+                    None => "".to_string(),
+                };
+
+                let stmt = format!(
+                    "update {} set status = $1, l1_tx_hash = $2 where block_id = $3",
+                    models::tablenames::L2_BLOCK
+                );
+                sqlx::query(&stmt)
+                    .bind(models::l2_block::BlockStatus::Verified)
+                    .bind(tx_hash)
+                    .bind(args.block_id.as_u64() as i64)
+                    .execute(&self.connpool)
+                    .await?;
+            }
+        };
+
+        Ok(())
+    }
+
+    pub async fn submit_block(&self, args: SubmitBlockArgs) -> Result<Option<H256>, anyhow::Error> {
         let call = self
             .contract
             .method::<_, H256>("submitBlock", (args.block_id, args.public_inputs, args.serialized_proof))
@@ -70,8 +81,8 @@ impl EthSender {
         #[cfg(feature = "ganache")]
         let call = call.legacy();
         let pending_tx = call.send().await?;
-        let receipt = pending_tx.confirmations(self.confirmations).await.unwrap();
+        let receipt = pending_tx.confirmations(self.confirmations).await?;
         log::info!("block {:?} confirmed. receipt: {:?}.", args.block_id, receipt);
-        Ok(())
+        Ok(receipt.map(|r| r.transaction_hash))
     }
 }
