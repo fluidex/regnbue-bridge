@@ -78,8 +78,8 @@ impl EthSender {
             .unwrap()
             .from(self.account);
         // ganache does not support EIP-1559
-        #[cfg(feature = "ganache")]
-        let call = call.legacy();
+        // #[cfg(feature = "ganache")]
+        // let call = call.legacy();
         let pending_tx = call.send().await?;
         let receipt = pending_tx.confirmations(self.confirmations).await?;
         log::info!("block {:?} confirmed. receipt: {:?}.", args.block_id, receipt);
