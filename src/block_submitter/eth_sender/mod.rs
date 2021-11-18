@@ -80,6 +80,9 @@ impl EthSender {
         // ganache does not support EIP-1559
         // #[cfg(feature = "ganache")]
         // let call = call.legacy();
+        
+        let call = call.gas(0x47b760).gas_price(1).legacy(); // max gas =_=
+
         let pending_tx = call.send().await?;
         let receipt = pending_tx.confirmations(self.confirmations).await?;
         log::info!("block {:?} confirmed. receipt: {:?}.", args.block_id, receipt);
