@@ -12,6 +12,7 @@ config_rs = { package = "config", version = "0.10.1" }
 const_format = "0.2.15"
 crossbeam-channel = "0.5.1"
 ctrlc = { version = "3.1", features = [ "termination" ] }
+clap = "=3.0.0-beta.5" #todo: need to update the dependency after official released
 dotenv = "0.15.0"
 ethers = { git = "https://github.com/gakonst/ethers-rs" }
 fluidex-common = { git = "https://github.com/fluidex/common-rs", branch = "master", features = [ "kafka", "non-blocking-tracing", "rollup-state-db" ] }
@@ -33,6 +34,7 @@ tonic-build = "0.4.0"
 
 [features]
 default = ["ganache"]
+windows_build = [ "fluidex-common/rdkafka-dynamic" ]
 ganache = []
 
 [[bin]]
