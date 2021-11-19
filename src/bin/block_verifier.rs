@@ -2,9 +2,9 @@ use clap::Parser;
 use ethers::abi::Abi;
 use ethers::prelude::*;
 use fluidex_common::non_blocking_tracing;
-use sqlx::Connection;
+use regnbue_bridge::block_submitter::{types::SubmitBlockArgs, Settings};
 use regnbue_bridge::storage::ConnectionType;
-use regnbue_bridge::block_submitter::{Settings, types::SubmitBlockArgs};
+use sqlx::Connection;
 
 #[derive(Parser, Debug)]
 #[clap(version = "0.1")]
@@ -13,7 +13,6 @@ struct Opts {
     #[clap(long = "block")]
     block_number: Option<u64>,
     verifier_addr: String,
-
     //TODO: add options for db, web3 and abi_file_path
 }
 
@@ -72,19 +71,20 @@ async fn main() -> anyhow::Result<()> {
 
     let args = if let Some(block_id) = opts.block_number {
         SubmitBlockArgs::fetch_by_blockid(block_id as i64, &mut conn).await?
-    }else {
+    } else {
         SubmitBlockArgs::fetch_latest(None, &mut conn).await?
     };
 
     if let Some(args) = args {
         log::debug!("public input of block is {:02x?}", args.public_data);
-        let ret = contract.method::<_, bool>("verify_serialized_proof", (args.public_inputs, args.serialized_proof))?.call().await?;
+        let ret = contract
+            .method::<_, bool>("verify_serialized_proof", (args.public_inputs, args.serialized_proof))?
+            .call()
+            .await?;
         println!("verify block {} result: {}", args.block_id, ret);
-        
-    }else {
+    } else {
         return Err(anyhow::anyhow!("No matched block"));
     }
-    
 
     Ok(())
 }

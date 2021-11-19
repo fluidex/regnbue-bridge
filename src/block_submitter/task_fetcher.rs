@@ -24,7 +24,6 @@ impl TryFrom<Task> for SubmitBlockArgs {
     type Error = anyhow::Error;
 
     fn try_from(t: Task) -> Result<Self, Self::Error> {
-
         let public_inputs: Vec<U256> = serde_json::de::from_slice(&t.public_input)?;
         let serialized_proof: Vec<U256> = serde_json::de::from_slice(&t.proof)?;
 
@@ -38,8 +37,10 @@ impl TryFrom<Task> for SubmitBlockArgs {
 }
 
 impl SubmitBlockArgs {
-
-    pub async fn fetch_by_blockid<'c>(block_id: i64, conn: impl sqlx::Executor<'c, Database = DbType>) -> Result<Option<Self>, anyhow::Error>{
+    pub async fn fetch_by_blockid<'c>(
+        block_id: i64,
+        conn: impl sqlx::Executor<'c, Database = DbType>,
+    ) -> Result<Option<Self>, anyhow::Error> {
         let query: &'static str = const_format::formatcp!(
             r#"
             select t.block_id     as block_id,
@@ -55,18 +56,18 @@ impl SubmitBlockArgs {
             models::tablenames::L2_BLOCK,
         );
 
-        let task: Option<Task> = sqlx::query_as(query)
-            .bind(block_id)
-            .fetch_optional(conn)
-            .await?;
-        
+        let task: Option<Task> = sqlx::query_as(query).bind(block_id).fetch_optional(conn).await?;
+
         match task {
-            Some(task) => Self::try_from(task).map(|t|Some(t)),
+            Some(task) => Self::try_from(task).map(Some),
             None => Ok(None),
         }
     }
 
-    pub async fn fetch_latest<'c>(start_id: Option<i64>, conn: impl sqlx::Executor<'c, Database = DbType>) -> Result<Option<Self>, anyhow::Error>{
+    pub async fn fetch_latest<'c>(
+        start_id: Option<i64>,
+        conn: impl sqlx::Executor<'c, Database = DbType>,
+    ) -> Result<Option<Self>, anyhow::Error> {
         let query: &'static str = const_format::formatcp!(
             r#"
             select t.block_id     as block_id,
@@ -90,18 +91,13 @@ impl SubmitBlockArgs {
             models::tablenames::L2_BLOCK,
         );
 
-        let task: Option<Task> = sqlx::query_as(query)
-            .bind(start_id.unwrap_or(-1))
-            .fetch_optional(conn)
-            .await?;
-        
+        let task: Option<Task> = sqlx::query_as(query).bind(start_id.unwrap_or(-1)).fetch_optional(conn).await?;
+
         match task {
-            Some(task) => Self::try_from(task).map(|t|Some(t)),
+            Some(task) => Self::try_from(task).map(Some),
             None => Ok(None),
         }
-    
     }
-
 }
 
 impl TaskFetcher {

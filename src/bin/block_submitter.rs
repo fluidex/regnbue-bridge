@@ -1,14 +1,14 @@
 use clap::Parser;
 use fluidex_common::non_blocking_tracing;
 use futures::{channel::mpsc, executor::block_on, SinkExt, StreamExt};
-use regnbue_bridge::block_submitter::{storage, EthSender, Settings, TaskFetcher, types};
+use regnbue_bridge::block_submitter::{storage, types, EthSender, Settings, TaskFetcher};
 use std::cell::RefCell;
 
 #[derive(Parser, Debug)]
 #[clap(version = "0.1")]
 struct Opts {
     #[clap(subcommand)]
-    command: Option<SubCommand>
+    command: Option<SubCommand>,
 }
 
 #[derive(Parser, Debug)]
@@ -16,19 +16,19 @@ enum SubCommand {
     /// Verify a block with specified block id
     Verify(VerifyBlock),
     /// manual submit a block
-    Manual(ManualSubmit)
+    Manual(ManualSubmit),
 }
 
 #[derive(Parser, Debug)]
 struct VerifyBlock {
-    block_id: i64
+    block_id: i64,
 }
 
 #[derive(Parser, Debug)]
 struct ManualSubmit {
     /// Dry-run mode just verify the next submittion without really submit it
     #[clap(long = "dry-run")]
-    dry_run: bool
+    dry_run: bool,
 }
 
 #[tokio::main]
@@ -56,20 +56,22 @@ async fn main() -> anyhow::Result<()> {
             SubCommand::Verify(opts) => {
                 let block_id = opts.block_id;
                 let block = types::SubmitBlockArgs::fetch_by_blockid(block_id, &dbpool).await?;
-                let ret = eth_sender.verify_block(block.ok_or_else(||anyhow::anyhow!("block {} not existed", block_id))?).await?;
+                let ret = eth_sender
+                    .verify_block(block.ok_or_else(|| anyhow::anyhow!("block {} not existed", block_id))?)
+                    .await?;
                 println!("verify block {} result: {}", block_id, ret);
-            },
+            }
             SubCommand::Manual(opts) => {
                 let block = types::SubmitBlockArgs::fetch_latest(None, &dbpool).await?;
-                let block = block.ok_or_else(||anyhow::anyhow!("no pending block for submitting"))?;
+                let block = block.ok_or_else(|| anyhow::anyhow!("no pending block for submitting"))?;
                 let block_id = block.block_id;
                 if opts.dry_run {
                     let ret = eth_sender.verify_submitting(block).await?;
-                    println!("verify submitting {} result: {}", block_id, ret);                    
-                }else {
+                    println!("verify submitting {} result: {}", block_id, ret);
+                } else {
                     eth_sender.submit_block(block).await?;
                 }
-            },
+            }
         };
 
         return Ok(());

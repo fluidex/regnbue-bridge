@@ -59,10 +59,13 @@ impl EthSender {
     pub async fn verify_submitting(&self, args: SubmitBlockArgs) -> Result<bool, anyhow::Error> {
         let ret = self
             .contract
-            .method::<_, bool>("verifySubmitting", (args.block_id, args.public_inputs, args.serialized_proof, args.public_data))?
+            .method::<_, bool>(
+                "verifySubmitting",
+                (args.block_id, args.public_inputs, args.serialized_proof, args.public_data),
+            )?
             .call()
             .await?;
-        
+
         Ok(ret)
     }
 
@@ -72,14 +75,17 @@ impl EthSender {
             .method::<_, bool>("verifyBlock", (args.public_inputs, args.serialized_proof, args.public_data))?
             .call()
             .await?;
-        
+
         Ok(ret)
     }
 
     pub async fn submit_block(&self, args: SubmitBlockArgs) -> Result<(), anyhow::Error> {
         let call = self
             .contract
-            .method::<_, H256>("submitBlock", (args.block_id, args.public_inputs, args.serialized_proof, args.public_data))?
+            .method::<_, H256>(
+                "submitBlock",
+                (args.block_id, args.public_inputs, args.serialized_proof, args.public_data),
+            )?
             .from(self.account);
         // ganache does not support EIP-1559
         #[cfg(feature = "ganache")]
