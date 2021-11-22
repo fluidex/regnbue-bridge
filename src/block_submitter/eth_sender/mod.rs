@@ -26,11 +26,7 @@ impl EthSender {
         let abi: Abi = contracts::get_abi(&config.contract_abi_file_path)?;
 
         let client = Provider::<Http>::try_from(config.web3_url.as_str())?;
-        let wallet = LocalWallet::decrypt_keystore(
-            config.keystore.as_str(),
-            config.password.as_str(),
-        )?
-            .with_chain_id(config.chain_id);
+        let wallet = LocalWallet::decrypt_keystore(config.keystore.as_str(), config.password.as_str())?.with_chain_id(config.chain_id);
         let account = wallet.address();
         let client = SignerMiddleware::new(client, wallet);
 
