@@ -1,9 +1,8 @@
 [package]
 name = "regnbue-bridge"
 version = "0.1.0"
-authors = [ "HAOYUatHZ <haoyu@protonmail.com>" ]
+authors = ["HAOYUatHZ <haoyu@protonmail.com>"]
 edition = "2021"
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

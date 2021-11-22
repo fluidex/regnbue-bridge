@@ -5,9 +5,9 @@ pub struct Settings {
     pub db: String,
     pub contract_address: String,
     pub contract_abi_file_path: String,
-    pub web3_url: String,     // TODO: default
     pub confirmations: usize, // TODO: default
-    #[serde(default)]
-    /// default using web3 first account
-    pub account: Option<String>,
+    pub web3_url: String,
+    pub keystore: String,
+    pub password: String,
+    pub chain_id: u64,
 }
