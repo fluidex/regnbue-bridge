@@ -40,6 +40,7 @@ impl TaskFetcher {
             block_id: i64,
             public_input: Vec<u8>,
             proof: Vec<u8>,
+            public_data: Vec<u8>,
         }
 
         let query: &'static str = const_format::formatcp!(
@@ -47,6 +48,7 @@ impl TaskFetcher {
             select t.block_id     as block_id,
                    t.public_input as public_input,
                    t.proof        as proof
+                   l2b.raw_public_data as public_data
             from {} t
                      inner join {} l2b
                                 on t.block_id = l2b.block_id
@@ -72,10 +74,13 @@ impl TaskFetcher {
         if let Some(task) = task {
             let public_inputs: Vec<U256> = serde_json::de::from_slice(&task.public_input)?;
             let serialized_proof: Vec<U256> = serde_json::de::from_slice(&task.proof)?;
+            // TODO: maybe https://github.com/fluidex/rollup-state-manager/issues/246?
+            // let public_data: Vec<u8> = serde_json::de::from_slice(&task.public_data)?;
             tx.try_send(ContractCall::SubmitBlock(SubmitBlockArgs {
                 block_id: task.block_id.into(),
                 public_inputs,
                 serialized_proof,
+                public_data: task.public_data,
             }))?;
             self.last_block_id = Some(task.block_id);
         }
