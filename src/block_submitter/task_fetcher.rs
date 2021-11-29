@@ -80,7 +80,7 @@ impl TaskFetcher {
                 block_id: task.block_id.into(),
                 public_inputs,
                 serialized_proof,
-                public_data: task.public_data
+                public_data: task.public_data,
             }))?;
             self.last_block_id = Some(task.block_id);
         }
