@@ -1,9 +1,11 @@
 use super::types::{ContractCall, SubmitBlockArgs};
 use crate::block_submitter::Settings;
 use crate::storage::{DbType, PoolType};
+use anyhow::anyhow;
 use crossbeam_channel::Sender;
 use ethers::types::U256;
 use fluidex_common::db::models;
+use serde::Deserialize;
 use std::time::Duration;
 
 #[derive(Debug)]
@@ -12,12 +14,19 @@ pub struct TaskFetcher {
     last_block_id: Option<i64>,
 }
 
+#[derive(Deserialize, Debug, Clone)]
+pub struct L2PubDataAux {
+    #[serde(rename = "deposit")]
+    pub deposit_txs_pos: Vec<u16>,
+}
+
 #[derive(sqlx::FromRow, Debug, Clone)]
 struct Task {
     block_id: i64,
     public_input: Vec<u8>,
     proof: Vec<u8>,
     public_data: Vec<u8>,
+    aux_data: Option<serde_json::Value>,
 }
 
 impl TryFrom<Task> for SubmitBlockArgs {
@@ -26,12 +35,32 @@ impl TryFrom<Task> for SubmitBlockArgs {
     fn try_from(t: Task) -> Result<Self, Self::Error> {
         let public_inputs: Vec<U256> = serde_json::de::from_slice(&t.public_input)?;
         let serialized_proof: Vec<U256> = serde_json::de::from_slice(&t.proof)?;
+        let block_id = U256::from(t.block_id);
+        let public_data = t.public_data;
+        let deposit_aux: Vec<u8> = match t.aux_data {
+            Some(val) => {
+                //encode deposit position array into compact bytes
+                let val_arr = val
+                    .get("deposit")
+                    .ok_or_else(|| anyhow!("no deposit field"))?
+                    .as_array()
+                    .ok_or_else(|| anyhow!("malform in deposit {}", val))?;
+                let mut ret_arr = Vec::new();
+                for i in val_arr {
+                    let ni = i.as_u64().ok_or_else(|| anyhow!("malform in deposit arr {}", i))? as u16;
+                    ret_arr.append(&mut Vec::from(ni.to_be_bytes()));
+                }
+                ret_arr
+            }
+            None => Vec::default(),
+        };
 
         Ok(SubmitBlockArgs {
-            block_id: U256::from(t.block_id),
+            block_id,
             public_inputs,
             serialized_proof,
-            public_data: t.public_data,
+            public_data,
+            deposit_aux,
         })
     }
 }
@@ -46,7 +75,8 @@ impl SubmitBlockArgs {
             select t.block_id     as block_id,
                    t.public_input as public_input,
                    t.proof        as proof,
-                   l2b.raw_public_data as public_data
+                   l2b.raw_public_data as public_data,
+                   l2b.public_data_aux as aux_data
             from {} t
                      inner join {} l2b
                                 on t.block_id = l2b.block_id
@@ -73,7 +103,8 @@ impl SubmitBlockArgs {
             select t.block_id     as block_id,
                    t.public_input as public_input,
                    t.proof        as proof,
-                   l2b.raw_public_data as public_data
+                   l2b.raw_public_data as public_data,
+                   l2b.public_data_aux as aux_data
             from {} t
                      inner join {} l2b
                                 on t.block_id = l2b.block_id

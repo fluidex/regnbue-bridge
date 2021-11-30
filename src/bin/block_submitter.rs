@@ -25,11 +25,7 @@ struct VerifyBlock {
 }
 
 #[derive(Parser, Debug)]
-struct ManualSubmit {
-    /// Dry-run mode just verify the next submittion without really submit it
-    #[clap(long = "dry-run")]
-    dry_run: bool,
-}
+struct ManualSubmit {}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -61,16 +57,10 @@ async fn main() -> anyhow::Result<()> {
                     .await?;
                 println!("verify block {} result: {}", block_id, ret);
             }
-            SubCommand::Manual(opts) => {
+            SubCommand::Manual(_) => {
                 let block = types::SubmitBlockArgs::fetch_latest(None, &dbpool).await?;
                 let block = block.ok_or_else(|| anyhow::anyhow!("no pending block for submitting"))?;
-                let block_id = block.block_id;
-                if opts.dry_run {
-                    let ret = eth_sender.verify_submitting(block).await?;
-                    println!("verify submitting {} result: {}", block_id, ret);
-                } else {
-                    eth_sender.submit_block(block).await?;
-                }
+                eth_sender.submit_block(block).await?;
             }
         };
 

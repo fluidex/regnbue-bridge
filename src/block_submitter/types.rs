@@ -11,4 +11,5 @@ pub struct SubmitBlockArgs {
     pub public_inputs: Vec<U256>,
     pub serialized_proof: Vec<U256>,
     pub public_data: Vec<u8>,
+    pub deposit_aux: Vec<u8>,
 }
