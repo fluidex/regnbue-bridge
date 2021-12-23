@@ -9,11 +9,14 @@ use ethers::types::H256;
 use fluidex_common::db::models;
 use std::convert::TryFrom;
 
+type SignedClient = SignerMiddleware<Provider<Http>, LocalWallet>;
+
 #[derive(Debug)]
 pub struct EthSender {
     connpool: PoolType,
+    client: SignedClient,
     account: Address,
-    contract: Contract<Provider<Http>>,
+    contract: Contract<SignedClient>,
     confirmations: usize,
 }
 
@@ -21,16 +24,17 @@ impl EthSender {
     pub async fn from_config_with_pool(config: &Settings, connpool: PoolType) -> Result<Self, anyhow::Error> {
         let address = config.contract_address.parse::<Address>()?;
         let abi: Abi = contracts::get_abi(&config.contract_abi_file_path)?;
-        let client = Provider::<Http>::try_from(config.web3_url.as_str())?; // assume wallet inside
-        let account = match config.account {
-            None => client.get_accounts().await?[0],
-            Some(ref addr) => addr.parse::<Address>()?,
-        };
 
-        let contract = Contract::new(address, abi, client);
+        let client = Provider::<Http>::try_from(config.web3_url.as_str())?;
+        let wallet = LocalWallet::decrypt_keystore(config.keystore.as_str(), config.password.as_str())?.with_chain_id(config.chain_id);
+        let account = wallet.address();
+        let client = SignerMiddleware::new(client, wallet);
+
+        let contract = Contract::new(address, abi, client.clone());
 
         Ok(Self {
             connpool,
+            client,
             account,
             contract,
             confirmations: config.confirmations,
