@@ -1,7 +1,7 @@
 use clap::Parser;
 use fluidex_common::non_blocking_tracing;
 use futures::{channel::mpsc, executor::block_on, SinkExt, StreamExt};
-use regnbue_bridge::block_submitter::{storage, types, EthSender, Settings, TaskFetcher};
+use regnbue_bridge::block_submitter::{storage, types, EthSenderConfigure, Settings, TaskFetcher};
 use std::cell::RefCell;
 
 #[derive(Parser, Debug)]
@@ -44,7 +44,8 @@ async fn main() -> anyhow::Result<()> {
 
     // TODO: maybe separate and have: 1. consumer 2. producer 3. sender
     let dbpool = storage::from_config(&settings).await?;
-    let eth_sender = EthSender::from_config_with_pool(&settings, dbpool.clone()).await?;
+    //let eth_sender = eth
+    let client = EthSenderConfigure::from_config(&settings).await?.build(dbpool.clone());
 
     // one-block mode
     if let Some(sub_cmd) = opts.command {
@@ -52,7 +53,7 @@ async fn main() -> anyhow::Result<()> {
             SubCommand::Verify(opts) => {
                 let block_id = opts.block_id;
                 let block = types::SubmitBlockArgs::fetch_by_blockid(block_id, &dbpool).await?;
-                let ret = eth_sender
+                let ret = client
                     .verify_block(block.ok_or_else(|| anyhow::anyhow!("block {} not existed", block_id))?)
                     .await?;
                 println!("verify block {} result: {}", block_id, ret);
@@ -60,7 +61,7 @@ async fn main() -> anyhow::Result<()> {
             SubCommand::Manual(_) => {
                 let block = types::SubmitBlockArgs::fetch_latest(None, &dbpool).await?;
                 let block = block.ok_or_else(|| anyhow::anyhow!("no pending block for submitting"))?;
-                eth_sender.submit_block(block).await?;
+                client.submit_block(block).await?;
             }
         };
 
@@ -83,7 +84,7 @@ async fn main() -> anyhow::Result<()> {
     let (tx, rx) = crossbeam_channel::unbounded();
     let mut fetcher = TaskFetcher::from_config_with_pool(&settings, dbpool.clone());
     let fetcher_task_handle = tokio::spawn(async move { fetcher.run(tx).await });
-    let eth_sender_task_handle = tokio::spawn(async move { eth_sender.run(rx).await });
+    let eth_sender_task_handle = tokio::spawn(async move { client.run(rx).await });
 
     tokio::select! {
         _ = async { fetcher_task_handle.await } => {
