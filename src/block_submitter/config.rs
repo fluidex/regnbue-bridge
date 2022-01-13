@@ -7,7 +7,7 @@ pub struct Settings {
     pub contract_abi_file_path: String,
     pub confirmations: usize, // TODO: default
     pub web3_url: String,
-    pub keystore: String,
-    pub password: String,
-    pub chain_id: u64,
+    pub keystore: Option<String>,
+    pub password: Option<String>,
+    pub chain_id: Option<u64>,
 }

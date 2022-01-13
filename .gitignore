@@ -15,5 +15,6 @@
 /target
 
 *.log
-
+.vscode
+.cargo
 config/block_submitter.yaml
